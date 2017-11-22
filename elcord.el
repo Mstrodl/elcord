@@ -103,7 +103,7 @@ Argument LINE-COUNT Total number of lines in buffer."
                                  ("spectate" . "stupidvimuseruseemacs")
                                  ))
                    ))
-  (setf elcord-nonce (format-time-string "%s%L"))
+  (setf elcord-nonce (format-time-string "%s%N"))
   (setf elcord-presence `(
                    ("cmd" . "SET_ACTIVITY")
                    ("args" . (("activity" . ,elcord-activity)
@@ -142,12 +142,16 @@ Argument LINE-COUNT Total number of lines in buffer."
 (elcord-connect)
 ; (message "Hopefully connected?")
 (defvar elcord-last-known-position (count-lines (point-min) (point)))
+(defvar elcord-last-known-buffer-name (buffer-name))
 (defun elcord-command-hook ()
   "Check if we changed our current line..."
-  (if (and (not (eq (count-lines (point-min) (point)) elcord-last-known-position)) elcord-connected)
-           (progn
-             (setf elcord-last-known-position (count-lines (point-min) (point)))
-             (elcord-create-presence))))
+  (if (and (or (not (eq (count-lines (point-min) (point))
+                        elcord-last-known-position))
+               (not (string= (buffer-name) elcord-last-known-buffer-name))) elcord-connected)
+      (progn
+        (setf elcord-last-known-buffer-name (buffer-name))
+        (setf elcord-last-known-position (count-lines (point-min) (point)))
+        (elcord-create-presence))))
 ; We have this hook which is called whenever like anything at all happens and we check if it changed the line#...
 (add-hook 'post-command-hook 'elcord-command-hook)
 

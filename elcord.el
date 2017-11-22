@@ -33,7 +33,7 @@
 
 (defun elcord-create-presence ()
   "Creates a new status and sets it."
-  (elcord-setpresence (buffer-name) (+ 1 (count-lines 1 (point))) (+ 1 (count-lines (point-min) (point-max)))))
+  (elcord-setpresence (buffer-name) (+ 1 (count-lines (point-min) (point))) (+ 1 (count-lines (point-min) (point-max)))))
 
 (defun elcord-handle-disconnect ()
   "Handles reconnecting when socket disconnects..."
@@ -141,17 +141,13 @@ Argument LINE-COUNT Total number of lines in buffer."
 (message "Opening Discord IPC socket...")
 (elcord-connect)
 ; (message "Hopefully connected?")
+(defvar elcord-last-known-position (count-lines (point-min) (point)))
 (defun elcord-command-hook ()
   "Check if we changed our current line..."
-  (if (or (eq 'next-line this-command)
-          (eq 'evil-ret this-command)
-          (eq 'previous-line this-command)
-          (eq 'newline this-command)
-          (eq 'scroll-up-command this-command)
-          (eq 'scroll-down-command this-command))
-      ; We get ratelimited.... really... really... REALLY hard.... *Good thing that the client makes sure we don't hit the rate limit and doesn't queue presences!*
-      (if elcord-connected
-          (elcord-create-presence))))
+  (if (and (not (eq (count-lines (point-min) (point)) elcord-last-known-position)) elcord-connected)
+           (progn
+             (setf elcord-last-known-position (count-lines (point-min) (point)))
+             (elcord-create-presence))))
 ; We have this hook which is called whenever like anything at all happens and we check if it changed the line#...
 (add-hook 'post-command-hook 'elcord-command-hook)
 

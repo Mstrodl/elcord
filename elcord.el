@@ -2,7 +2,7 @@
 
 ;;; Copyright 2017 heatingdevice
 
-;;; Version: 0.0.1
+;;; Version: 0.0.2
 ;;; Author: heatingdevice
 ;;; URL: https://github.com/mstrodl/elcord
 
@@ -18,13 +18,38 @@
 (eval-when-compile (require 'cl))
 (require 'bindat)
 
-(message "Opening Discord IPC socket...")
 
 (defvar elcord-client_id "373861544456486913")
-(defun elcord-on-connect (&rest args)
-  "Debug function used to log packets recieved."
-  ; (message "New msg %s" ARGS)
+(defun elcord-on-connect (process evnt)
+  "Debug function used to log connection state changes."
+  (setf print-escape-newlines t)
+  
+  (if (string= evnt "connection broken by remote peer\n")
+      (elcord-handle-disconnect)
+    (message (prin1-to-string evnt)))
   )
+
+(defvar elcord-connected nil)
+
+(defun elcord-create-presence ()
+  "Creates a new status and sets it."
+  (elcord-setpresence (buffer-name) (+ 1 (count-lines 1 (point))) (+ 1 (count-lines (point-min) (point-max)))))
+
+(defun elcord-handle-disconnect ()
+  "Handles reconnecting when socket disconnects..."
+  (setf elcord-connected nil)
+  (setf elcord-first-message nil)
+  (elcord-connect))
+
+(defvar elcord-first-message nil)
+
+(defun elcord-on-message (process evnt)
+  "Debug function used to output all incoming packets"
+  ; (message evnt)
+  (if (not elcord-first-message)
+      (progn
+        (elcord-create-presence)
+        (setf elcord-first-message t))))
 
 (defvar elcord-jsonstr "")
 (defvar elcord-datalen 0)
@@ -78,7 +103,7 @@ Argument LINE-COUNT Total number of lines in buffer."
                                  ("spectate" . "stupidvimuseruseemacs")
                                  ))
                    ))
-  (setf elcord-nonce (format-time-string "%s"))
+  (setf elcord-nonce (format-time-string "%s%L"))
   (setf elcord-presence `(
                    ("cmd" . "SET_ACTIVITY")
                    ("args" . (("activity" . ,elcord-activity)
@@ -93,13 +118,29 @@ Argument LINE-COUNT Total number of lines in buffer."
 (if (eq system-type "windows-nt")
     (setf elcord-discord-socket "\\\\?\\pipe\\discord-ipc-0"))
 
-(defvar elcord-sock (make-network-process :name "elcord-sock"
-                      :remote elcord-discord-socket
-                      :sentinel 'elcord-on-connect
-                      :filter 'elcord-on-connect))
-(set-process-query-on-exit-flag elcord-sock nil)
-(message "Sending Discord IPC handshake...")
-(elcord-send-packet 0 `(("v" . 1) ("client_id" . ,elcord-client_id)))
+(defvar elcord-sock nil)
+(defun elcord-connect ()
+  "Connects to the Discord socket"
+  (condition-case err
+    (if (not elcord-connected)
+        (progn
+          (setf elcord-sock
+                (make-network-process :name "elcord-sock"
+                                      :remote elcord-discord-socket
+                                      :sentinel 'elcord-on-connect
+                                      :filter 'elcord-on-message))
+          (set-process-query-on-exit-flag elcord-sock nil)
+          (message "Sending Discord IPC handshake...")
+          (elcord-send-packet 0 `(("v" . 1) ("client_id" . ,elcord-client_id)))
+          (setf elcord-connected t)))
+    (file-error (if (not elcord-connected)
+        (progn
+          (sleep-for 1)
+          (elcord-connect))))))
+
+(message "Opening Discord IPC socket...")
+(elcord-connect)
+; (message "Hopefully connected?")
 (defun elcord-command-hook ()
   "Check if we changed our current line..."
   (if (or (eq 'next-line this-command)
@@ -109,8 +150,8 @@ Argument LINE-COUNT Total number of lines in buffer."
           (eq 'scroll-up-command this-command)
           (eq 'scroll-down-command this-command))
       ; We get ratelimited.... really... really... REALLY hard.... *Good thing that the client makes sure we don't hit the rate limit and doesn't queue presences!*
-      (elcord-setpresence (buffer-name) (count-lines 1 (point)) (count-lines (point-min) (point-max))))
-  )
+      (if elcord-connected
+          (elcord-create-presence))))
 ; We have this hook which is called whenever like anything at all happens and we check if it changed the line#...
 (add-hook 'post-command-hook 'elcord-command-hook)
 

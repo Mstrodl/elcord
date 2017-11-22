@@ -21,7 +21,9 @@
 
 (defvar elcord-client_id "373861544456486913")
 (defun elcord-on-connect (process evnt)
-  "Debug function used to log connection state changes."
+  "Debug function used to log connection state change.
+Argument PROCESS Process the event occured on.
+Argument EVNT The reason the connection state changed."
   (setf print-escape-newlines t)
   
   (if (string= evnt "connection broken by remote peer\n")
@@ -32,7 +34,7 @@
 (defvar elcord-connected nil)
 
 (defun elcord-create-presence ()
-  "Creates a new status and sets it."
+  "Create a new status and set it."
   (elcord-setpresence (buffer-name) (+ 1 (count-lines (point-min) (point))) (+ 1 (count-lines (point-min) (point-max)))))
 
 (defun elcord-handle-disconnect ()
@@ -44,7 +46,9 @@
 (defvar elcord-first-message nil)
 
 (defun elcord-on-message (process evnt)
-  "Debug function used to output all incoming packets"
+  "Debug function used to output all incoming packets.
+Argument PROCESS The process the message was recieved on.
+Argument EVNT The message recieved on the socket."
   ; (message evnt)
   (if (not elcord-first-message)
       (progn
@@ -120,7 +124,7 @@ Argument LINE-COUNT Total number of lines in buffer."
 
 (defvar elcord-sock nil)
 (defun elcord-connect ()
-  "Connects to the Discord socket"
+  "Connects to the Discord socket."
   (condition-case err
     (if (not elcord-connected)
         (progn

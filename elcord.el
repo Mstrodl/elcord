@@ -82,6 +82,7 @@ Argument OBJ The data to send to the IPC server."
 (defvar elcord-nonce "")
 (defvar elcord-presence '())
 (defvar elcord-pid (emacs-pid))
+(defvar elcord-join-and-spectate t)
 
 (defun elcord-setpresence (filename line-num line-count)
   "Set presence.
@@ -93,19 +94,18 @@ Argument LINE-COUNT Total number of lines in buffer."
                                 ("large_image" . "emacs_icon")
                                 ("large_text" . "Use this!")
                                 ("small_image" . "vim_small")
-                                ("small_text" . "Not this!")
-                                ))
+                                ("small_text" . "Not this!")))
                    ("details" . ,(concat "Editing " filename))
                    ("state" . ,(concat "Line " (number-to-string line-num)))
                    ("party" . (
                                ("id" . "theonlyeditor")
                                ("size" . [,line-num ,line-count])
                                ))
-                   ("secrets" . (
-                                 ("join" . "yesuseemacswithmepls")
-                                 ("match" . "emacsisbest")
-                                 ("spectate" . "stupidvimuseruseemacs")
-                                 ))
+                   ("secrets" . ,(if elcord-join-and-spectate (
+                                  ("join" . "yesuseemacswithmepls")
+                                  ("match" . "emacsisbest")
+                                  ("spectate" . "stupidvimuseruseemacs"))
+                                   '(("match" . "emacsisbest"))))
                    ))
   (setf elcord-nonce (format-time-string "%s%N"))
   (setf elcord-presence `(

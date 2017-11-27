@@ -101,7 +101,7 @@ Argument LINE-COUNT Total number of lines in buffer."
                                ("id" . "theonlyeditor")
                                ("size" . [,line-num ,line-count])
                                ))
-                   ("secrets" . ,(if elcord-join-and-spectate (
+                   ("secrets" . ,(if elcord-join-and-spectate '(
                                   ("join" . "yesuseemacswithmepls")
                                   ("match" . "emacsisbest")
                                   ("spectate" . "stupidvimuseruseemacs"))

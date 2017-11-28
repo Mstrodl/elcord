@@ -91,7 +91,7 @@ Argument LINE-NUM Line number the pointer is located at.
 Argument LINE-COUNT Total number of lines in buffer."
   (setf elcord-activity `(
                    ("assets" . (
-                                ("large_image" . "emacs_icon")
+                                ("large_image" . ,(if (boundp 'spacemacs-version) "spacemacs_icon" "emacs_icon"))
                                 ("large_text" . "Use this!")
                                 ("small_image" . "vim_small")
                                 ("small_text" . "Not this!")))

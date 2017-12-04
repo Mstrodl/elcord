@@ -5,13 +5,12 @@
 ;;; Version: 0.0.2
 ;;; Author: heatingdevice
 ;;; URL: https://github.com/mstrodl/elcord
-
-;;; Code:
-
-(provide 'elcord)
+;;; License: MIT
 
 ;;; Commentary:
 ;; elcord allows you to show off your buffer with all your Discord friends via the new rich presence feature
+
+;;; Code:
 
 (require 'json)
 (eval-when-compile (require 'cl-lib))
@@ -139,10 +138,6 @@ Argument LINE-COUNT Total number of lines in buffer."
           (sleep-for 1)
           (elcord-connect))))))
 
-(message "Opening Discord IPC socket...")
-(unless (and (boundp 'elcord-no-autoconnect) elcord-no-autoconnect)
-  (elcord-connect))
-; (message "Hopefully connected?")
 (defvar elcord-last-known-position (count-lines (point-min) (point)))
 (defvar elcord-last-known-buffer-name (buffer-name))
 (defun elcord-command-hook ()
@@ -154,7 +149,8 @@ Argument LINE-COUNT Total number of lines in buffer."
         (setq elcord-last-known-buffer-name (buffer-name))
         (setq elcord-last-known-position (count-lines (point-min) (point)))
         (elcord-create-presence))))
-; We have this hook which is called whenever like anything at all happens and we check if it changed the line#...
+;; We have this hook which is called whenever like anything at all happens and we check if it changed the line#...
 (add-hook 'post-command-hook 'elcord-command-hook)
 
+(provide 'elcord)
 ;;; elcord.el ends here

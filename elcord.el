@@ -134,9 +134,7 @@ Argument LINE-COUNT Total number of lines in buffer."
           (elcord-send-packet 0 `(("v" . 1) ("client_id" . ,elcord-client_id)))
           (setq elcord-connected t)))
     (file-error (unless elcord-connected
-        (progn
-          (sleep-for 1)
-          (elcord-connect))))))
+		  (run-at-time "15 sec" nil 'elcord-connect)))))
 
 (defvar elcord-last-known-position (count-lines (point-min) (point)))
 (defvar elcord-last-known-buffer-name (buffer-name))

@@ -200,9 +200,7 @@ Argument LINE-COUNT Total number of lines in buffer."
         (setq elcord-timer (run-at-time 0 15 'elcord-timer-hook))
         elcord-connected)
     (file-error
-     (unless elcord-connected
-       (sleep-for 1)
-       (elcord-connect)))))
+     (run-at-time 15 nil 'elcord-connect))))
 
 (defun elcord-disconnect ()
   (when elcord-connected

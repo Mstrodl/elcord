@@ -58,7 +58,7 @@ if the connection to Discord is lost."
           (if (eq system-type 'windows-nt)
               (make-process
                :name "*elcord-sock*"
-               :command (list "powershell" elcord--stdpipe-path "." elcord--discord-ipc-pipe)
+               :command (list "PowerShell" "-NoProfile" "-ExecutionPolicy" "Bypass" "-Command" elcord--stdpipe-path "." elcord--discord-ipc-pipe)
                :connection-type nil
                :sentinel 'elcord--connection-sentinel
                :filter 'elcord--connection-filter)

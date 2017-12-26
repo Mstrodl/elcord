@@ -49,18 +49,27 @@ if the connection to Discord is lost."
   "Connects to the Discord socket."
   (interactive)
   (unless (or elcord--connected
-              (null (elcord--resolve-client-id)))
+              (null (elcord--resolve-client-id))
+              (and (eq system-type 'windows-nt)
+                   (or
+                    (not (executable-find "powershell"))
+                    (not (file-exists-p elcord--stdpipe-path)))))
     (setq elcord--sock
           (if (eq system-type 'windows-nt)
               (make-process
                :name "*elcord-sock*"
-               :command (list "pipeman" elcord--discord-ipc-pipe)
+               :command (list "powershell" elcord--stdpipe-path "." elcord--discord-ipc-pipe)
                :connection-type nil
                :sentinel 'elcord--connection-sentinel
                :filter 'elcord--connection-filter)
             (make-network-process
              :name "*elcord-sock*"
-             :remote (concat (or (getenv "XDG_RUNTIME_DIR") (getenv "TMPDIR") (getenv "TMP") (getenv "TEMP") "/tmp") "/" elcord--discord-ipc-pipe)
+             :remote (concat (or (getenv "XDG_RUNTIME_DIR")
+                                 (getenv "TMPDIR")
+                                 (getenv "TMP")
+                                 (getenv "TEMP")
+                                 "/tmp")
+                             "/" elcord--discord-ipc-pipe)
              :sentinel 'elcord--connection-sentinel
              :filter 'elcord--connection-filter)))
     (set-process-query-on-exit-flag elcord--sock nil)
@@ -93,6 +102,11 @@ if the connection to Discord is lost."
 (defvar elcord--first-message nil)
 (defvar elcord--last-known-position (count-lines (point-min) (point)))
 (defvar elcord--last-known-buffer-name (buffer-name))
+
+(when (eq system-type 'windows-nt)
+  (defvar elcord--stdpipe-path (expand-file-name
+                                "stdpipe.ps1"
+                                (file-name-directory (file-truename load-file-name)))))
 
 (defun elcord--resolve-client-id ()
   "Get the client ID to use for elcord by looking at

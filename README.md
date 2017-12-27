@@ -1,16 +1,41 @@
-# Elcord
-## Rich presence for the best editor!
+# elcord
+## Discord Rich Presence for Emacs
 
-Hello, so you crusaders have made it this far killing all those who lay in your path: yet-to-be-enlightened nano users, downright dumb notepad users, atom snobs, vscode whatever-they-ares, and worst of all the evil vim users. Now great warrior, you must reclaim the holy land for the great god RMS wills it! Now it is time to show your victorious status to all your Notepad++-user friends and harrass them until they start using your editor to get them off your back!
+![](images/elcord-preview.png)
+
+Show off your emacs-savy ways to all your Discord friends and strangers.
+
+This package will connect with a local Discord client to update your status via the Discord Rich Presence API.
 
 ## Installing
-So, how do you ascend to such great glory and join the ranks of RMS and the FSF gang? It's quite easy believe it or not:
-1. Clone this repo:
-```bash
-git clone git@github.com:/MStrodl/elcord.git ~/.emacs.d/elcord
-```
-2. Load it in your `init.el`:
-```elisp
-(load-file "~/.emacs.d/elcord/elcord.el")
-```
-3. 
+
+Just take elcord.el file and stick it somewhere in your load path and load it.
+
+There are customization options available.
+Try
+`M-x customize-group RET elcord RET`
+
+After it's loaded, call `elcord-connect` to start elcord.
+
+### Note for Windows
+
+tldr: Make sure that the [stdpipe.ps1](stdpipe.ps1) is in the same directory as the elcord.el file.
+
+Talking with Discord's IPC mechanism is achieves through the PowerShell script [stdpipe.ps1](stdpipe.ps1). This is to get around Emacs' inability to talk through named pipes on Windows.
+
+Everything should work out-of-the-box. Just make sure this PowerShell script is installed in the same directory as your elcord.el file.
+
+
+## Icons
+
+While the alist `elcord-mode-icon-alist` is customizable, all icon ID's are linked to the application pointed to by `elcord-client-id`.
+
+For adding icons, you have two options:
+
+1. Contact [me](zulu.inuoe@gmail.com) to add them
+2. Create your own 'Application' with its own set of icons.
+
+For creating an 'Application': Visit Discord's [application page](https://discordapp.com/developers/applications/me/)
+Create a new application and upload icons as a "small" asset.
+
+Atfer you've created your application, Customize `elcord-client-id` to be the new application's client ID.

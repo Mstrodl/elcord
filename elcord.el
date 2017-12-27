@@ -22,20 +22,35 @@
   "Options for elcord."
   :prefix "elcord-")
 
-(defcustom elcord-client-id 'nil
+(defcustom elcord-client-id '"388338871475240965"
   "ID of elcord client."
   :type '(choice (const :tag "No ID" nil)
                  (string :length :tag "Use the specified ID")
                  (function :tag "Call the function with no args to get the ID."))
   :group 'elcord)
 
-(defcustom elcord-mode-icon-alist '((emacs-lisp-mode . "emacs_icon"))
+(defcustom elcord-mode-icon-alist '((c-mode . "c-mode_icon")
+                                    (c++-mode . "cpp-mode_icon")
+                                    (csharp-mode . "csharp-mode_icon")
+                                    (comint-mode . "comint-mode_icon")
+                                    (emacs-lisp-mode . "emacs_icon")
+                                    (java-mode . "java-mode_icon")
+                                    (lisp-mode . "lisp-mode_icon")
+                                    (slime-repl-mode . "lisp-mode_icon")
+                                    (sly-mrepl-mode . "lisp-mode_icon")
+                                    (python-mode . "python-mode_icon"))
   "alist of major modes to icon names to have elcord use.
 Note, these icon names must be available as 'small_image' in Discord."
   :type '(alist :key-type symbol :value-type string)
   :group 'elcord)
 
-(defcustom elcord-mode-text-alist '()
+(defcustom elcord-mode-text-alist '((c-mode . "C  ")
+                                    (c++-mode . "C++")
+                                    (csharp-mode . "C#")
+                                    (java-mode . "Java")
+                                    (lisp-mode . "Common-Lisp")
+                                    (slime-repl-mode . "SLIME-REPL")
+                                    (sly-mrepl-mode . "Sly-REPL"))
   "alist of major modes to text labels to have elcord use."
   :type '(alist :key-type symbol :value-type string)
   :group 'elcord)

@@ -13,6 +13,7 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl-lib))
+(eval-when-compile (require 'subr-x))
 
 (require 'json)
 (require 'bindat)
@@ -111,7 +112,7 @@ if the connection to Discord is lost."
 (defun elcord--resolve-client-id ()
   "Get the client ID to use for elcord by looking at
 `elcord-client-id' and extracting its value."
-  (typecase elcord-client-id
+  (cl-typecase elcord-client-id
     (nil
      nil)
     (string
@@ -121,7 +122,7 @@ if the connection to Discord is lost."
 
 (defun elcord--connection-sentinel (process evnt)
   "Track connection state change on Discord connection."
-  (case (process-status process)
+  (cl-case (process-status process)
     (exit
      (elcord--handle-disconnect))
     (t)))

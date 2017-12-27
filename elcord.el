@@ -25,7 +25,7 @@
 (defcustom elcord-client-id '"388338871475240965"
   "ID of elcord client."
   :type '(choice (const :tag "No ID" nil)
-                 (string :length :tag "Use the specified ID")
+                 (string :tag "Use the specified ID")
                  (function :tag "Call the function with no args to get the ID."))
   :group 'elcord)
 
@@ -58,6 +58,19 @@ Note, these icon names must be available as 'small_image' in Discord."
 (defcustom elcord-auto-reconnect 't
   "When enabled, elcord will automatically reconnect
 if the connection to Discord is lost."
+  :type 'boolean
+  :group 'elcord)
+
+(defcustom elcord-display-buffer-details 't
+  "When enabled, Discorc status will display buffer name and line numbers:
+  \"Editing <buffer-name>\"
+  \"Line <line-number> (<line-number> of <line-count>)\"
+
+Otherwise, it will display:
+  \"Editing\"
+  \"<elcord-mode-text>\"
+
+The mode text is the same found by `elcord-mode-text-alist'"
   :type 'boolean
   :group 'elcord)
 
@@ -146,7 +159,7 @@ if the connection to Discord is lost."
   "Track incoming data from Discord connection."
   (unless elcord--first-message
     (progn
-      (elcord--create-presence)
+      (elcord--setpresence)
       (setq elcord--first-message t))))
 
 (defun elcord--reconnect ()
@@ -160,10 +173,6 @@ if the connection to Discord is lost."
   (setq elcord--connected nil)
   (setq elcord--first-message nil)
   (elcord--reconnect))
-
-(defun elcord--create-presence ()
-  "Create a new status and set it."
-  (elcord--setpresence (buffer-name) (+ 1 (count-lines (point-min) (point))) (+ 1 (count-lines (point-min) (point-max)))))
 
 (defun elcord--send-packet (opcode obj)
   "Packs and sends a packet to the IPC server.
@@ -226,19 +235,27 @@ or nil, if no text/icon are available for the current major mode."
        (cons "small_image" icon))
     nil))
 
-(defun elcord--setpresence (filename line-num line-count)
-  "Set presence.
-Argument FILENAME Name of current buffer.
-Argument LINE-NUM Line number the pointer is located at.
-Argument LINE-COUNT Total number of lines in buffer."
+(defun elcord--details-and-state ()
+  (if elcord-display-buffer-details
+      (list
+       (cons "details" (concat "Editing " (buffer-name)))
+       (cons "state" (concat "Line "
+                             (format-mode-line "%l ")
+                             "("
+                             (format-mode-line "%l") " of "
+                             (number-to-string  (+ 1 (count-lines (point-min) (point-max))))
+                             ")")))
+    (list
+     (cons "details" "Editing")
+     (cons "state" (elcord--mode-text)))))
+
+(defun elcord--setpresence ()
+  "Set presence."
   (let* ((activity
           `(("assets" . (("large_image" . "emacs_icon")
                          ("large_text" . "Emacs")
                          ,@(elcord--mode-icon-and-text)))
-            ("details" . ,(concat "Editing " filename))
-            ("state" . ,(concat "Line " (number-to-string line-num)))
-            ("party" . (("id" . "theonlyeditor")
-                        ("size" . [,line-num ,line-count])))
+            ,@(elcord--details-and-state)
             ("secrets" . (("match" . "emacsisbest")))))
          (nonce (format-time-string "%s%N"))
          (presence
@@ -257,7 +274,7 @@ Argument LINE-COUNT Total number of lines in buffer."
     (progn
       (setq elcord--last-known-buffer-name (buffer-name))
       (setq elcord--last-known-position (count-lines (point-min) (point)))
-      (elcord--create-presence))))
+      (elcord--setpresence))))
 
 (provide 'elcord)
 ;;; elcord.el ends here

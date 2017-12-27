@@ -62,7 +62,7 @@ if the connection to Discord is lost."
   :group 'elcord)
 
 (defcustom elcord-display-buffer-details 't
-  "When enabled, Discorc status will display buffer name and line numbers:
+  "When enabled, Discord status will display buffer name and line numbers:
   \"Editing <buffer-name>\"
   \"Line <line-number> (<line-number> of <line-count>)\"
 
@@ -87,18 +87,24 @@ The mode text is the same found by `elcord-mode-text-alist'"
           (if (eq system-type 'windows-nt)
               (make-process
                :name "*elcord-sock*"
-               :command (list "PowerShell" "-NoProfile" "-ExecutionPolicy" "Bypass" "-Command" elcord--stdpipe-path "." elcord--discord-ipc-pipe)
+               :command (list
+                         "PowerShell"
+                         "-NoProfile"
+                         "-ExecutionPolicy" "Bypass"
+                         "-Command" elcord--stdpipe-path "." elcord--discord-ipc-pipe)
                :connection-type nil
                :sentinel 'elcord--connection-sentinel
                :filter 'elcord--connection-filter)
             (make-network-process
              :name "*elcord-sock*"
-             :remote (concat (or (getenv "XDG_RUNTIME_DIR")
-                                 (getenv "TMPDIR")
-                                 (getenv "TMP")
-                                 (getenv "TEMP")
-                                 "/tmp")
-                             "/" elcord--discord-ipc-pipe)
+             :remote (expand-file-name
+                      elcord--discord-ipc-pipe
+                      (file-name-as-directory
+                       (or (getenv "XDG_RUNTIME_DIR")
+                           (getenv "TMPDIR")
+                           (getenv "TMP")
+                           (getenv "TEMP")
+                           "/tmp")))
              :sentinel 'elcord--connection-sentinel
              :filter 'elcord--connection-filter)))
     (set-process-query-on-exit-flag elcord--sock nil)
@@ -159,7 +165,7 @@ The mode text is the same found by `elcord-mode-text-alist'"
   "Track incoming data from Discord connection."
   (unless elcord--first-message
     (progn
-      (elcord--setpresence)
+      (elcord--set-presence)
       (setq elcord--first-message t))))
 
 (defun elcord--reconnect ()
@@ -236,20 +242,19 @@ or nil, if no text/icon are available for the current major mode."
     nil))
 
 (defun elcord--details-and-state ()
+  "Obtain the details and state to use for Discord's Rich Presence."
   (if elcord-display-buffer-details
       (list
-       (cons "details" (concat "Editing " (buffer-name)))
-       (cons "state" (concat "Line "
-                             (format-mode-line "%l ")
-                             "("
-                             (format-mode-line "%l") " of "
-                             (number-to-string  (+ 1 (count-lines (point-min) (point-max))))
-                             ")")))
+       (cons "details" (format "Editing %s" (buffer-name)))
+       (cons "state" (format "Line %s (%s of %S)"
+                             (format-mode-line "%l")
+                             (format-mode-line "%l")
+                             (+ 1 (count-lines (point-min) (point-max))))))
     (list
      (cons "details" "Editing")
      (cons "state" (elcord--mode-text)))))
 
-(defun elcord--setpresence ()
+(defun elcord--set-presence ()
   "Set presence."
   (let* ((activity
           `(("assets" . (("large_image" . "emacs_icon")
@@ -274,7 +279,7 @@ or nil, if no text/icon are available for the current major mode."
     (progn
       (setq elcord--last-known-buffer-name (buffer-name))
       (setq elcord--last-known-position (count-lines (point-min) (point)))
-      (elcord--setpresence))))
+      (elcord--set-presence))))
 
 (provide 'elcord)
 ;;; elcord.el ends here

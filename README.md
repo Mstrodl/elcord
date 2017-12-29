@@ -38,4 +38,4 @@ For adding icons, you have two options:
 For creating an 'Application': Visit Discord's [application page](https://discordapp.com/developers/applications/me/)
 Create a new application and upload icons as a "small" asset.
 
-Atfer you've created your application, Customize `elcord-client-id` to be the new application's client ID.
+After you've created your application, Customize `elcord-client-id` to be the new application's client ID.

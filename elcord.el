@@ -55,12 +55,6 @@ Note, these icon names must be available as 'small_image' in Discord."
   :type '(alist :key-type symbol :value-type string)
   :group 'elcord)
 
-(defcustom elcord-auto-reconnect 't
-  "When enabled, elcord will automatically reconnect
-if the connection to Discord is lost."
-  :type 'boolean
-  :group 'elcord)
-
 (defcustom elcord-display-buffer-details 't
   "When enabled, Discord status will display buffer name and line numbers:
   \"Editing <buffer-name>\"
@@ -74,67 +68,23 @@ The mode text is the same found by `elcord-mode-text-alist'"
   :type 'boolean
   :group 'elcord)
 
-(defun elcord-connect ()
-  "Connects to the Discord socket."
-  (interactive)
-  (unless (or elcord--connected
-              (null (elcord--resolve-client-id))
-              (and (eq system-type 'windows-nt)
-                   (or
-                    (not (executable-find "powershell"))
-                    (not (file-exists-p elcord--stdpipe-path)))))
-    (setq elcord--sock
-          (if (eq system-type 'windows-nt)
-              (make-process
-               :name "*elcord-sock*"
-               :command (list
-                         "PowerShell"
-                         "-NoProfile"
-                         "-ExecutionPolicy" "Bypass"
-                         "-Command" elcord--stdpipe-path "." elcord--discord-ipc-pipe)
-               :connection-type nil
-               :sentinel 'elcord--connection-sentinel
-               :filter 'elcord--connection-filter)
-            (make-network-process
-             :name "*elcord-sock*"
-             :remote (expand-file-name
-                      elcord--discord-ipc-pipe
-                      (file-name-as-directory
-                       (or (getenv "XDG_RUNTIME_DIR")
-                           (getenv "TMPDIR")
-                           (getenv "TMP")
-                           (getenv "TEMP")
-                           "/tmp")))
-             :sentinel 'elcord--connection-sentinel
-             :filter 'elcord--connection-filter)))
-    (set-process-query-on-exit-flag elcord--sock nil)
-    (elcord--send-packet 0 `(("v" . 1) ("client_id" . ,(elcord--resolve-client-id))))
-    (setq elcord--connected t)
-    (setq elcord--elcord-update-presence-timer (run-at-time 0 15 'elcord--update-presence)))
-  elcord--connected)
-
-(defun elcord-disconnect ()
-  (interactive)
-  (when elcord--connected
-    (progn
-      (when elcord--elcord-update-presence-timer
-        (cancel-timer elcord--elcord-update-presence-timer)
-        (setq elcord--elcord-update-presence-timer nil))
-      (setq elcord--first-message nil)
-      (setq elcord--connected nil)
-      (delete-process elcord--sock)
-      (setq elcord--sock nil)))
-  (when elcord--reconnect-timer
-    (cancel-timer elcord--reconnect-timer)
-    (setq elcord--reconnect-timer nil))
-  (not elcord--connected))
+(define-minor-mode elcord-mode
+  "Global minor mode for displaying Rich Pressence in Discord."
+  nil nil nil
+  :global t
+  :group 'elcord
+  :after-hook
+  (progn
+    (cond
+     (elcord-mode
+      (elcord--enable))
+     (t
+      (elcord--disable)))))
 
 (defvar elcord--discord-ipc-pipe "discord-ipc-0")
-(defvar elcord--elcord-update-presence-timer nil)
+(defvar elcord--update-presence-timer nil)
 (defvar elcord--reconnect-timer nil)
 (defvar elcord--sock nil)
-(defvar elcord--connected nil)
-(defvar elcord--first-message nil)
 (defvar elcord--last-known-position (count-lines (point-min) (point)))
 (defvar elcord--last-known-buffer-name (buffer-name))
 
@@ -142,6 +92,54 @@ The mode text is the same found by `elcord-mode-text-alist'"
   (defvar elcord--stdpipe-path (expand-file-name
                                 "stdpipe.ps1"
                                 (file-name-directory (file-truename load-file-name)))))
+
+(defun elcord--make-process ()
+  (cl-case system-type
+    (windows-nt
+     (make-process
+      :name "*elcord-sock*"
+      :command (list
+                "PowerShell"
+                "-NoProfile"
+                "-ExecutionPolicy" "Bypass"
+                "-Command" elcord--stdpipe-path "." elcord--discord-ipc-pipe)
+      :connection-type nil
+      :sentinel 'elcord--connection-sentinel
+      :filter 'elcord--connection-filter
+      :noquery nil))
+    (t
+     (make-network-process
+      :name "*elcord-sock*"
+      :remote (expand-file-name
+               elcord--discord-ipc-pipe
+               (file-name-as-directory
+                (or (getenv "XDG_RUNTIME_DIR")
+                    (getenv "TMPDIR")
+                    (getenv "TMP")
+                    (getenv "TEMP")
+                    "/tmp")))
+      :sentinel 'elcord--connection-sentinel
+      :filter 'elcord--connection-filter
+      :noquery nil))))
+
+(defun elcord--enable ()
+  (unless (elcord--resolve-client-id)
+    (warn "elcord: no elcord-client-id available"))
+  (when (eq system-type 'windows-nt)
+    (unless (executable-find "powershell")
+      (warn "elcord: powershell not available"))
+    (unless (file-exists-p elcord--stdpipe-path)
+      (warn "elcord: 'stdpipe' script does not exist (%s)" elcord--stdpipe-path)))
+
+  ;;Start trying to connect
+  (elcord--start-reconnect))
+
+(defun elcord--disable ()
+  ;;Cancel updates
+  (elcord--cancel-updates)
+  ;;Cancel any reconnect attempt
+  (elcord--cancel-reconnect)
+  (elcord--disconnect))
 
 (defun elcord--resolve-client-id ()
   "Get the client ID to use for elcord by looking at
@@ -157,47 +155,79 @@ The mode text is the same found by `elcord-mode-text-alist'"
 (defun elcord--connection-sentinel (process evnt)
   "Track connection state change on Discord connection."
   (cl-case (process-status process)
-    (exit
+    ((closed exit)
      (elcord--handle-disconnect))
     (t)))
 
 (defun elcord--connection-filter (process evnt)
   "Track incoming data from Discord connection."
-  (unless elcord--first-message
-    (progn
-      (elcord--set-presence)
-      (setq elcord--first-message t))))
+  (elcord--start-updates))
+
+(defun elcord--connect ()
+  "Connects to the Discord socket."
+  (condition-case nil
+      (progn
+        (setq elcord--sock (elcord--make-process))
+        (condition-case nil
+            (progn
+              (elcord--send-packet 0 `(("v" . 1) ("client_id" . ,(elcord--resolve-client-id))))
+              (setq success t))
+          (error
+           (delete-process elcord--sock)
+           (setq elcord--sock nil)))
+        t)
+    (error
+     nil)))
+
+(defun elcord--disconnect ()
+  (when elcord--sock
+    (delete-process elcord--sock)
+    (setq elcord--sock nil)))
 
 (defun elcord--reconnect ()
   "Attempt to reconnect elcord."
-  (when elcord-auto-reconnect
-    (unless (elcord-connect)
-      (setq elcord--reconnect-timer (run-at-time 15 nil 'elcord--reconnect)))))
+  (message "elcord: attempting reconnect..")
+  (when (elcord--connect)
+    ;;Reconnected.
+    (message "elcord: conecting...")
+    (elcord--cancel-reconnect)))
+
+(defun elcord--start-reconnect ()
+  "Starts attempting to reconnect"
+  (unless elcord--reconnect-timer
+    (setq elcord--reconnect-timer (run-at-time 0 15 'elcord--reconnect))))
+
+(defun elcord--cancel-reconnect ()
+  "Starts attempting to reconnect"
+  (when elcord--reconnect-timer
+    (cancel-timer elcord--reconnect-timer)
+    (setq elcord--reconnect-timer nil)))
 
 (defun elcord--handle-disconnect ()
   "Handles reconnecting when socket disconnects..."
-  (setq elcord--connected nil)
-  (setq elcord--first-message nil)
-  (elcord--reconnect))
+  (message "elcord: disconnected")
+  ;;Stop updating presence for now
+  (elcord--cancel-updates)
+  ;;Start trying to reconnect
+  (elcord--start-reconnect))
 
 (defun elcord--send-packet (opcode obj)
   "Packs and sends a packet to the IPC server.
 Argument OPCODE OP code to send.
 Argument OBJ The data to send to the IPC server."
-  (when (process-live-p elcord--sock)
-    (let* ((jsonstr (json-encode obj))
-           (datalen (length jsonstr))
-           (message-spec
-            `((:op u32r)
-              (:len u32r)
-              (:data str ,datalen)))
-           (packet
-            (bindat-pack
-             message-spec
-             `((:op . ,opcode)
-               (:len . ,datalen)
-               (:data . ,jsonstr)))))
-      (process-send-string elcord--sock packet))))
+  (let* ((jsonstr (json-encode obj))
+         (datalen (length jsonstr))
+         (message-spec
+          `((:op u32r)
+            (:len u32r)
+            (:data str ,datalen)))
+         (packet
+          (bindat-pack
+           message-spec
+           `((:op . ,opcode)
+             (:len . ,datalen)
+             (:data . ,jsonstr)))))
+    (process-send-string elcord--sock packet)))
 
 (defun elcord--mode-icon ()
   "Figure out what icon to use for the current major mode.
@@ -272,14 +302,31 @@ or nil, if no text/icon are available for the current major mode."
 
 (defun elcord--update-presence ()
   "Check if we changed our current line..."
-  (when (and (or (not (eq (count-lines (point-min) (point))
-                          elcord--last-known-position))
-                 (not (string= (buffer-name) elcord--last-known-buffer-name)))
-             elcord--connected)
+  (when (or (not (eq (count-lines (point-min) (point))
+                     elcord--last-known-position))
+            (not (string= (buffer-name) elcord--last-known-buffer-name)))
     (progn
       (setq elcord--last-known-buffer-name (buffer-name))
       (setq elcord--last-known-position (count-lines (point-min) (point)))
-      (elcord--set-presence))))
+      (condition-case nil
+          ;;Try and set the presence
+          (elcord--set-presence)
+        (error
+         ;;If we hit an error, cancel updates
+         (elcord--cancel-updates)
+         ;; and try reconnecting
+         (elcord--start-reconnect))))))
+
+(defun elcord--start-updates ()
+  (unless elcord--update-presence-timer
+    (message "elcord: connected. starting updates")
+    ;;Start sending updates now that we've heard from discord
+    (setq elcord--update-presence-timer (run-at-time 0 15 'elcord--update-presence))))
+
+(defun elcord--cancel-updates ()
+  (when elcord--update-presence-timer
+    (cancel-timer elcord--update-presence-timer)
+    (setq elcord--update-presence-timer nil)))
 
 (provide 'elcord)
 ;;; elcord.el ends here

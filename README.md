@@ -15,7 +15,7 @@ There are customization options available.
 Try
 `M-x customize-group RET elcord RET`
 
-After it's loaded, call `elcord-connect` to start elcord.
+After it's loaded, enable `elcord-mode` to start elcord.
 
 ### Note for Windows
 

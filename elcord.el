@@ -1,11 +1,16 @@
 ;;; elcord.el --- Allows you to integrate Rich Presence from Discord
 
-;;; Copyright 2017 heatingdevice
+;; Copyright (C) 2017 heatingdevice
 
-;;; Version: 0.0.2
-;;; Author: heatingdevice
-;;; URL: https://github.com/mstrodl/elcord
-;;; License: MIT
+;; Author: heatingdevice
+;;      Wilfredo Velázquez-Rodríguez <zulu.inuoe@gmail.com>
+;; Maintainer: Wilfredo Velázquez-Rodríguez <zulu.inuoe@gmail.com>
+;; Created: 21 Nov 2017
+;; Version: 1.0.0
+;; Keywords: discord
+;; Homepage: https://github.com/Zulu-Inuoe/elcord
+;; Package-Requires: (bindat cl-lib json subr-x)
+;; License: MIT
 
 ;;; Commentary:
 ;; elcord allows you to show off your buffer with all your Discord friends via the new rich presence feature

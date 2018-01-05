@@ -169,9 +169,7 @@ The mode text is the same found by `elcord-mode-text-alist'"
       (progn
         (setq elcord--sock (elcord--make-process))
         (condition-case nil
-            (progn
-              (elcord--send-packet 0 `(("v" . 1) ("client_id" . ,(elcord--resolve-client-id))))
-              (setq success t))
+            (elcord--send-packet 0 `(("v" . 1) ("client_id" . ,(elcord--resolve-client-id))))
           (error
            (delete-process elcord--sock)
            (setq elcord--sock nil)))

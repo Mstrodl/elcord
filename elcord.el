@@ -7,9 +7,9 @@
 ;; Maintainer: Wilfredo Velázquez-Rodríguez <zulu.inuoe@gmail.com>
 ;; Created: 21 Nov 2017
 ;; Version: 1.0.0
-;; Keywords: discord
+;; Keywords: games
 ;; Homepage: https://github.com/Zulu-Inuoe/elcord
-;; Package-Requires: (bindat cl-lib json subr-x)
+;; Package-Requires: ((emacs "25"))
 ;; License: MIT
 
 ;;; Commentary:
@@ -25,7 +25,8 @@
 
 (defgroup elcord nil
   "Options for elcord."
-  :prefix "elcord-")
+  :prefix "elcord-"
+  :group 'external)
 
 (defcustom elcord-client-id '"388338871475240965"
   "ID of elcord client (Application ID).
@@ -77,6 +78,7 @@ The mode text is the same found by `elcord-mode-text-alist'"
 (define-minor-mode elcord-mode
   "Global minor mode for displaying Rich Pressence in Discord."
   nil nil nil
+  :require 'elcord
   :global t
   :group 'elcord
   :after-hook

@@ -23,8 +23,9 @@
   :prefix "elcord-")
 
 (defcustom elcord-client-id '"388338871475240965"
-  "ID of elcord client."
-  :type '(choice (const :tag "No ID" nil)
+  "ID of elcord client (Application ID).
+See <https://discordapp.com/developers/applications/me>."
+  :type '(choice (const :tag "'Native' Application ID" "388338871475240965")
                  (string :tag "Use the specified ID")
                  (function :tag "Call the function with no args to get the ID."))
   :group 'elcord)

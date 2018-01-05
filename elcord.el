@@ -45,7 +45,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (slime-repl-mode . "lisp-mode_icon")
                                     (sly-mrepl-mode . "lisp-mode_icon")
                                     (python-mode . "python-mode_icon"))
-  "alist of major modes to icon names to have elcord use.
+  "Mapping alist of major modes to icon names to have elcord use.
 Note, these icon names must be available as 'small_image' in Discord."
   :type '(alist :key-type symbol :value-type string)
   :group 'elcord)
@@ -57,13 +57,13 @@ Note, these icon names must be available as 'small_image' in Discord."
                                     (lisp-mode . "Common-Lisp")
                                     (slime-repl-mode . "SLIME-REPL")
                                     (sly-mrepl-mode . "Sly-REPL"))
-  "alist of major modes to text labels to have elcord use."
+  "Mapping alist of major modes to text labels to have elcord use."
   :type '(alist :key-type symbol :value-type string)
   :group 'elcord)
 
 (defcustom elcord-display-buffer-details 't
   "When enabled, Discord status will display buffer name and line numbers:
-  \"Editing <buffer-name>\"
+\"Editing <buffer-name>\"
   \"Line <line-number> (<line-number> of <line-count>)\"
 
 Otherwise, it will display:
@@ -87,19 +87,30 @@ The mode text is the same found by `elcord-mode-text-alist'"
      (t
       (elcord--disable)))))
 
-(defvar elcord--discord-ipc-pipe "discord-ipc-0")
-(defvar elcord--update-presence-timer nil)
-(defvar elcord--reconnect-timer nil)
-(defvar elcord--sock nil)
-(defvar elcord--last-known-position (count-lines (point-min) (point)))
-(defvar elcord--last-known-buffer-name (buffer-name))
+(defvar elcord--discord-ipc-pipe "discord-ipc-0"
+  "The name of the discord IPC pipe.")
+
+(defvar elcord--update-presence-timer nil
+  "Timer which periodically updates Discord Rich Presence.
+nil when elcord is not active.")
+(defvar elcord--reconnect-timer nil
+  "Timer used by elcord to attempt connection periodically, when active but disconnected.")
+(defvar elcord--sock nil
+  "The process used to communicate with Discord IPC.")
+(defvar elcord--last-known-position (count-lines (point-min) (point))
+  "Last known position (line number) recorded by elcord.")
+(defvar elcord--last-known-buffer-name (buffer-name)
+  "Last known buffer recorded by elcord.")
 
 (when (eq system-type 'windows-nt)
   (defvar elcord--stdpipe-path (expand-file-name
                                 "stdpipe.ps1"
-                                (file-name-directory (file-truename load-file-name)))))
+                                (file-name-directory (file-truename load-file-name)))
+    "Path to the 'stdpipe' script, which on Windows is used as a proxy for the
+Discord named pipe."))
 
 (defun elcord--make-process ()
+  "Make the asynchronous process that communicates with Discord IPC."
   (cl-case system-type
     (windows-nt
      (make-process
@@ -129,6 +140,7 @@ The mode text is the same found by `elcord-mode-text-alist'"
       :noquery nil))))
 
 (defun elcord--enable ()
+  "Called when variable ‘elcord-mode’ is enabled."
   (unless (elcord--resolve-client-id)
     (warn "elcord: no elcord-client-id available"))
   (when (eq system-type 'windows-nt)
@@ -141,6 +153,7 @@ The mode text is the same found by `elcord-mode-text-alist'"
   (elcord--start-reconnect))
 
 (defun elcord--disable ()
+  "Called when variable ‘elcord-mode’ is disabled."
   ;;Cancel updates
   (elcord--cancel-updates)
   ;;Cancel any reconnect attempt
@@ -148,8 +161,7 @@ The mode text is the same found by `elcord-mode-text-alist'"
   (elcord--disconnect))
 
 (defun elcord--resolve-client-id ()
-  "Get the client ID to use for elcord by looking at
-`elcord-client-id' and extracting its value."
+  "Evaluate `elcord-client-id' and return the client ID to use."
   (cl-typecase elcord-client-id
     (nil
      nil)
@@ -159,14 +171,18 @@ The mode text is the same found by `elcord-mode-text-alist'"
      (funcall elcord-client-id))))
 
 (defun elcord--connection-sentinel (process evnt)
-  "Track connection state change on Discord connection."
+  "Track connection state change on Discord connection.
+Argument PROCESS The process this sentinel is attached to.
+Argument EVNT The event which triggered the sentinel to run."
   (cl-case (process-status process)
     ((closed exit)
      (elcord--handle-disconnect))
     (t)))
 
 (defun elcord--connection-filter (process evnt)
-  "Track incoming data from Discord connection."
+  "Track incoming data from Discord connection.
+Argument PROCESS The process this filter is attached to.
+Argument EVNT The available output from the process."
   (elcord--start-updates))
 
 (defun elcord--connect ()
@@ -184,6 +200,7 @@ The mode text is the same found by `elcord-mode-text-alist'"
      nil)))
 
 (defun elcord--disconnect ()
+  "Disconnect elcord."
   (when elcord--sock
     (delete-process elcord--sock)
     (setq elcord--sock nil)))
@@ -197,18 +214,18 @@ The mode text is the same found by `elcord-mode-text-alist'"
     (elcord--cancel-reconnect)))
 
 (defun elcord--start-reconnect ()
-  "Starts attempting to reconnect"
+  "Start attempting to reconnect."
   (unless elcord--reconnect-timer
     (setq elcord--reconnect-timer (run-at-time 0 15 'elcord--reconnect))))
 
 (defun elcord--cancel-reconnect ()
-  "Starts attempting to reconnect"
+  "Cancels any ongoing reconnection attempt."
   (when elcord--reconnect-timer
     (cancel-timer elcord--reconnect-timer)
     (setq elcord--reconnect-timer nil)))
 
 (defun elcord--handle-disconnect ()
-  "Handles reconnecting when socket disconnects..."
+  "Handles reconnecting when socket disconnects."
   (message "elcord: disconnected")
   ;;Stop updating presence for now
   (elcord--cancel-updates)
@@ -322,12 +339,14 @@ or nil, if no text/icon are available for the current major mode."
          (elcord--start-reconnect))))))
 
 (defun elcord--start-updates ()
+  "Start sending periodic update to Discord Rich Presence."
   (unless elcord--update-presence-timer
     (message "elcord: connected. starting updates")
     ;;Start sending updates now that we've heard from discord
     (setq elcord--update-presence-timer (run-at-time 0 15 'elcord--update-presence))))
 
 (defun elcord--cancel-updates ()
+  "Stop sending periodic update to Discord Rich Presence."
   (when elcord--update-presence-timer
     (cancel-timer elcord--update-presence-timer)
     (setq elcord--update-presence-timer nil)))

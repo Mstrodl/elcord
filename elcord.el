@@ -26,11 +26,10 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl-lib))
-(eval-when-compile (require 'subr-x))
-
-(require 'json)
 (require 'bindat)
+(require 'cl-lib)
+(require 'json)
+(require 'subr-x)
 
 (defgroup elcord nil
   "Options for elcord."
@@ -105,21 +104,24 @@ The mode text is the same found by `elcord-mode-text-alist'"
 (defvar elcord--update-presence-timer nil
   "Timer which periodically updates Discord Rich Presence.
 nil when elcord is not active.")
+
 (defvar elcord--reconnect-timer nil
   "Timer used by elcord to attempt connection periodically, when active but disconnected.")
+
 (defvar elcord--sock nil
   "The process used to communicate with Discord IPC.")
+
 (defvar elcord--last-known-position (count-lines (point-min) (point))
   "Last known position (line number) recorded by elcord.")
+
 (defvar elcord--last-known-buffer-name (buffer-name)
   "Last known buffer recorded by elcord.")
 
-(when (eq system-type 'windows-nt)
-  (defvar elcord--stdpipe-path (expand-file-name
-                                "stdpipe.ps1"
-                                (file-name-directory (file-truename load-file-name)))
-    "Path to the 'stdpipe' script, which on Windows is used as a proxy for the
-Discord named pipe."))
+(defvar elcord--stdpipe-path (expand-file-name
+                              "stdpipe.ps1"
+                              (file-name-directory (file-truename load-file-name)))
+  "Path to the 'stdpipe' script, which on Windows is used as a proxy for the
+Discord named pipe. Unused on other platforms.")
 
 (defun elcord--make-process ()
   "Make the asynchronous process that communicates with Discord IPC."

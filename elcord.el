@@ -130,8 +130,9 @@ nil when elcord is not active.")
 (defvar elcord--stdpipe-path (expand-file-name
                               "stdpipe.ps1"
                               (file-name-directory (file-truename load-file-name)))
-  "Path to the 'stdpipe' script, which on Windows is used as a proxy for the
-Discord named pipe. Unused on other platforms.")
+  "Path to the 'stdpipe' script.
+On Windows, this script is used as a proxy for the Discord named pipe.
+Unused on other platforms.")
 
 (defun elcord--make-process ()
   "Make the asynchronous process that communicates with Discord IPC."

@@ -108,6 +108,18 @@ The mode text is the same found by `elcord-mode-text-alist'"
      (t
       (elcord--disable)))))
 
+(defvar elcord--editor-name
+  (cond
+   ((boundp 'spacemacs-version) "Spacemacs")
+   (t "Emacs"))
+  "The name to use to represent the current editor.")
+
+(defvar elcord--editor-icon
+  (cond
+   ((boundp 'spacemacs-version) "spacemacs_icon")
+   (t "emacs_icon"))
+  "The icon to use to represent the current editor.")
+
 (defvar elcord--discord-ipc-pipe "discord-ipc-0"
   "The name of the discord IPC pipe.")
 
@@ -281,7 +293,7 @@ If an icon is mapped by `elcord-mode-icon-alist', then that is used.
 Otherwise, if the mode is a derived mode, try to find an icon for it.
 If no icon is available, use the default icon."
   (let ((mode major-mode)
-        (ret "emacs_icon"))
+        (ret elcord--editor-icon))
     (while mode
       (if-let ((icon (assoc mode elcord-mode-icon-alist)))
           (progn
@@ -333,11 +345,10 @@ or nil, if no text/icon are available for the current major mode."
 (defun elcord--set-presence ()
   "Set presence."
   (let* ((activity
-          `(("assets" . (("large_image" . "emacs_icon")
-                         ("large_text" . "Emacs")
+          `(("assets" . (("large_image" . ,elcord--editor-icon)
+                         ("large_text" . ,elcord--editor-name)
                          ,@(elcord--mode-icon-and-text)))
-            ,@(elcord--details-and-state)
-            ("secrets" . (("match" . "emacsisbest")))))
+            ,@(elcord--details-and-state)))
          (nonce (format-time-string "%s%N"))
          (presence
            `(("cmd" . "SET_ACTIVITY")

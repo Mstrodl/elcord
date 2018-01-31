@@ -4,11 +4,10 @@
 
 ;; Author: heatingdevice
 ;;      Wilfredo Velázquez-Rodríguez <zulu.inuoe@gmail.com>
-;; Maintainer: Wilfredo Velázquez-Rodríguez <zulu.inuoe@gmail.com>
 ;; Created: 21 Nov 2017
 ;; Version: 1.0.0
 ;; Keywords: games
-;; Homepage: https://github.com/Zulu-Inuoe/elcord
+;; Homepage: https://github.com/Mstrodl/elcord
 ;; Package-Requires: ((emacs "25"))
 ;; License: MIT
 

@@ -1,16 +1,63 @@
-# Elcord
-## Rich presence for the best editor!
+# elcord
 
-Hello, so you crusaders have made it this far killing all those who lay in your path: yet-to-be-enlightened nano users, downright dumb notepad users, atom snobs, vscode whatever-they-ares, and worst of all the evil vim users. Now great warrior, you must reclaim the holy land for the great god RMS wills it! Now it is time to show your victorious status to all your Notepad++-user friends and harrass them until they start using your editor to get them off your back!
+[![MELPA](https://melpa.org/packages/elcord-badge.svg)](https://melpa.org/#/elcord)
+
+![](images/elcord-preview.png)
+
+## Discord Rich Presence for Emacs
+
+Show off your emacs-savy ways to all your Discord friends and strangers.
+
+This package will connect with a local Discord client to update your status via the Discord Rich Presence API.
 
 ## Installing
-So, how do you ascend to such great glory and join the ranks of RMS and the FSF gang? It's quite easy believe it or not:
-1. Clone this repo:
-```bash
-git clone git@github.com:/MStrodl/elcord.git ~/.emacs.d/elcord
+
+### Installing from MELPA
+
+elcord is available from [MELPA](https://melpa.org/)
+
+To install:
+`M-x package-install RET elcord RET`
+
+### Installation from Source
+
+Simply place [elcord.el](elcord.el) file in a place Emacs can find it load/require it.
+
+#### Note for Windows
+
+Make sure that the [stdpipe.ps1](stdpipe.ps1) is in the same directory as the [elcord.el](elcord.el) file.
+
+Talking with Discord's IPC mechanism is achieves through this PowerShell script to get around Emacs' inability to talk through named pipes on Windows.
+Everything should work out-of-the-box. Just make sure this PowerShell script is installed in the same directory as your [elcord.el](elcord.el) file.
+
+## Usage
+
+After installing, enable `elcord-mode`.
+
+Minimal init file:
+
+``` emacs-lisp
+(require 'elcord)
+(elcord-mode)
 ```
-2. Load it in your `init.el`:
-```elisp
-(load-file "~/.emacs.d/elcord/elcord.el")
-```
-3. 
+
+There are customization options available.
+
+Try
+`M-x customize-group RET elcord RET`
+
+## Icons
+
+While the alist `elcord-mode-icon-alist` is customizable, all icon ID's are linked to the application pointed to by `elcord-client-id`.
+If you'd like to request a new icon for a major mode be added, please open an [issue](../../issues).
+
+### Custom Discord Application
+
+Alternatively, you may create your own 'Application' with its own set of icons.
+
+For creating an 'Application':
+1. Visit Discord's [application page](https://discordapp.com/developers/applications/me/)
+2. Create a new application and upload icons as a "small" asset.
+
+After you've created your application, Customize `elcord-client-id` to be the new application's client ID,
+and set the value of `elcord-mode-icon-alist` as appropriate to reference your new icons.

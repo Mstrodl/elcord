@@ -94,7 +94,7 @@ The mode text is the same found by `elcord-mode-text-alist'"
 
 ;;;###autoload
 (define-minor-mode elcord-mode
-  "Global minor mode for displaying Rich Pressence in Discord."
+  "Global minor mode for displaying Rich Presence in Discord."
   nil nil nil
   :require 'elcord
   :global t
@@ -246,7 +246,7 @@ Argument EVNT The available output from the process."
   (message "elcord: attempting reconnect..")
   (when (elcord--connect)
     ;;Reconnected.
-    (message "elcord: conecting...")
+    (message "elcord: connecting...")
     (elcord--cancel-reconnect)))
 
 (defun elcord--start-reconnect ()

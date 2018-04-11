@@ -266,7 +266,9 @@ Argument EVNT The available output from the process."
   ;;Stop updating presence for now
   (elcord--cancel-updates)
   ;;Start trying to reconnect
-  (elcord--start-reconnect))
+  (when
+      (bound-and-true-p elcord-mode)
+    (elcord--start-reconnect)))
 
 (defun elcord--send-packet (opcode obj)
   "Packs and sends a packet to the IPC server.

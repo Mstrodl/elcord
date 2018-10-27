@@ -5,53 +5,61 @@ param (
 
 # Use named pipe as stdin/out
 
-$npipeClient = new-object System.IO.Pipes.NamedPipeClientStream(
-                            $ServerName, $PipeName,
-                            [System.IO.Pipes.PipeDirection]::InOut,
-                            [System.IO.Pipes.PipeOptions]::Asynchronous)
+$Source = @"
+using System;
+using System.IO;
+using System.IO.Pipes;
+using System.Threading.Tasks;
 
-$pipeBuffer = new-object char[](512)
-$stdinBuffer = new-object char[](512)
-
-try
+public static class StdPipe
 {
-    $npipeClient.Connect()
-
-    $pipeReader = new-object System.IO.StreamReader($npipeClient)
-    $pipeWriter = new-object System.IO.StreamWriter($npipeClient)
-    $pipeWriter.AutoFlush = $true
-
-    $stdinReader = new-object System.IO.StreamReader([System.Console]::OpenStandardInput())
-    $stdoutWriter = new-object System.IO.StreamWriter([System.Console]::OpenStandardOutput())
-    $stdoutWriter.AutoFlush = $true
-
-    $taskArray =
-        @(
-            $pipeReader.ReadAsync($pipeBuffer, 0, $pipeBuffer.Length)
-            , $stdinReader.ReadAsync($stdinBuffer, 0, $stdinBuffer.Length)
-        )
-
-    while ($true)
+    public static void RouteToPipe(string pipeServer, string pipeName)
     {
-        $readyIndex = [System.Threading.Tasks.Task]::WaitAny($taskArray)
+        var pipeClient = new NamedPipeClientStream(pipeServer, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+        pipeClient.Connect();
 
-        if($readyIndex -eq 0)
-        {#pipe read complete
-            $bytesRead = $taskArray[$readyIndex].Result
-            $stdoutWriter.Write($pipeBuffer, 0, $bytesRead)
-            #kick off another read
-            $taskArray[$readyIndex] = $pipeReader.ReadAsync($pipeBuffer, 0, $pipeBuffer.Length)
-        }
-        else
-        {#stdin read complete
-            $bytesRead = $taskArray[$readyIndex].Result
-            $pipeWriter.Write($stdinBuffer, 0, $bytesRead)
-            #kick off another read
-            $taskArray[$readyIndex] = $stdinReader.ReadAsync($stdinBuffer, 0, $stdinBuffer.Length)
+        var pipeReader = new StreamReader(pipeClient, Console.OutputEncoding);
+        var pipeWriter = new StreamWriter(pipeClient, Console.InputEncoding);
+
+        var pipeBuffer = new char[512];
+        var stdBuffer = new char[512];
+
+        var tasks = new Task<int>[2]
+        {
+            pipeReader.ReadAsync(pipeBuffer, 0, pipeBuffer.Length),
+            ReadFromStdinAsync(stdBuffer, 0, stdBuffer.Length)
+        };
+
+        while(true)
+        {
+            var doneIdx = Task.WaitAny(tasks);
+
+            var bytesRead = tasks[doneIdx].Result;
+            if (doneIdx == 0)
+            {//Input from pipe
+             Console.Out.Write(pipeBuffer, 0, bytesRead);
+             Console.Out.Flush();
+             tasks[doneIdx] = pipeReader.ReadAsync(pipeBuffer, 0, pipeBuffer.Length);
+            }
+            else
+            {//Input from stdin
+             pipeWriter.Write(stdBuffer, 0, bytesRead);
+             pipeWriter.Flush();
+             tasks[doneIdx] = ReadFromStdinAsync(stdBuffer, 0, stdBuffer.Length);
+            }
         }
     }
+
+    private static Task<int> ReadFromStdinAsync(char[] buffer, int offset, int len)
+    {
+        return Task.Run(() =>
+                        {
+                            return Console.In.Read(buffer, offset, len);
+                        });
+    }
 }
-finally
-{
-    $npipeClient.Dispose()
-}
+"@
+
+Add-Type -TypeDefinition $Source -Language CSharp
+
+[StdPipe]::RouteToPipe($ServerName, $PipeName)

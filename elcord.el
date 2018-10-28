@@ -194,7 +194,21 @@ Unused on other platforms.")
   (elcord--cancel-updates)
   ;;Cancel any reconnect attempt
   (elcord--cancel-reconnect)
+  ;;Empty our presence
+  (elcord--empty-presence)
   (elcord--disconnect))
+
+(defun elcord--empty-presence ()
+  "Sends an empty presence for when elcord is disabled"
+  (let* ((activity
+	  `(("details" . "Emacs"))) ;; For the time being we have to send a presence after we connect, we can't empty it :/
+	 (nonce (format-time-string "%s%N"))
+         (presence
+           `(("cmd" . "SET_ACTIVITY")
+             ("args" . (("activity" . ,activity)
+                        ("pid" . ,(emacs-pid))))
+             ("nonce" . ,nonce))))
+    (elcord--send-packet 1 presence)))
 
 (defun elcord--resolve-client-id ()
   "Evaluate `elcord-client-id' and return the client ID to use."

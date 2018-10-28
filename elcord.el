@@ -158,7 +158,7 @@ Unused on other platforms.")
                 "-NoProfile"
                 "-ExecutionPolicy" "Bypass"
                 "-Command" elcord--stdpipe-path "." elcord--discord-ipc-pipe)
-      :connection-type nil
+      :connection-type 'pipe
       :sentinel 'elcord--connection-sentinel
       :filter 'elcord--connection-filter
       :noquery nil))

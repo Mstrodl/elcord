@@ -48,6 +48,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (clojure-mode . "clojure-mode_icon")
                                     (csharp-mode . "csharp-mode_icon")
                                     (comint-mode . "comint-mode_icon")
+                                    (cperl-mode . "cperl-mode_icon")
                                     (emacs-lisp-mode . "emacs_icon")
                                     (enh-ruby-mode . "ruby-mode_icon")
                                     (erc-mode . "irc-mode_icon")
@@ -62,6 +63,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (rust-mode . "rust-mode_icon")
                                     (slime-repl-mode . "lisp-mode_icon")
                                     (sly-mrepl-mode . "lisp-mode_icon")
+                                    (php-mode . "php-mode_icon")
                                     (python-mode . "python-mode_icon"))
   "Mapping alist of major modes to icon names to have elcord use.
 Note, these icon names must be available as 'small_image' in Discord."
@@ -71,12 +73,14 @@ Note, these icon names must be available as 'small_image' in Discord."
 (defcustom elcord-mode-text-alist '((c-mode . "C  ")
                                     (c++-mode . "C++")
                                     (csharp-mode . "C#")
+                                    (cperl-mode . "Perl")
                                     (enh-ruby-mode . "Ruby")
                                     (fsharp-mode . "F#")
                                     (java-mode . "Java")
                                     (lisp-mode . "Common-Lisp")
                                     (slime-repl-mode . "SLIME-REPL")
-                                    (sly-mrepl-mode . "Sly-REPL"))
+                                    (sly-mrepl-mode . "Sly-REPL")
+                                    (php-mode "PHP"))
   "Mapping alist of major modes to text labels to have elcord use."
   :type '(alist :key-type symbol :value-type string)
   :group 'elcord)

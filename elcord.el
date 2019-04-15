@@ -58,6 +58,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (js-mode . "javascript-mode_icon")
                                     (kotlin-mode . "kotlin-mode_icon")
                                     (lisp-mode . "lisp-mode_icon")
+                                    (org-mode . "org-mode_icon")
                                     (racket-mode . "racket-mode_icon")
                                     (ruby-mode . "ruby-mode_icon")
                                     (rust-mode . "rust-mode_icon")

@@ -99,6 +99,11 @@ The mode text is the same found by `elcord-mode-text-alist'"
   :type 'boolean
   :group 'elcord)
 
+(defcustom elcord-use-major-mode-as-main-icon 'nil
+  "When enabled, the major mode determines the main icon, rather than it being the editor."
+  :type 'boolean
+  :group 'elcord)
+
 ;;;###autoload
 (define-minor-mode elcord-mode
   "Global minor mode for displaying Rich Presence in Discord."
@@ -340,16 +345,30 @@ If no text is available, use the value of `mode-name'."
     ret))
 
 (defun elcord--mode-icon-and-text ()
-  "Obtain the icon & text to use for the small icon, using current major mode.
-Get either a list
-  ((\"small_text\" . <text>) (\"small_image\" . <icon-name>))
-or nil, if no text/icon are available for the current major mode."
-  (if-let ((icon (elcord--mode-icon))
-           (text (elcord--mode-text)))
-      (list
-       (cons "small_text" text)
-       (cons "small_image" icon))
-    nil))
+  "Obtain the icon & text to use for the large/small icon, using current major mode.
+  ((\"large_text\" . <text>)
+   (\"large_image\" . <icon-name>)
+   (\"small_text\" . <text>)
+   (\"small_image\" . <icon-name>))"
+  (let ((text (elcord--mode-text))
+        (icon (elcord--mode-icon))
+        large-text large-image small-text small-image)
+    (cond
+     (elcord-use-major-mode-as-main-icon
+      (setq large-text text
+            large-icon icon
+            small-text elcord--editor-name
+            small-icon elcord--editor-icon))
+     (t
+      (setq large-text elcord--editor-name
+            large-icon elcord--editor-icon
+            small-text text
+            small-icon icon)))
+    (list
+     (cons "large_text" large-text)
+     (cons "large_image" large-icon)
+     (cons "small_text" small-text)
+     (cons "small_image" small-icon))))
 
 (defun elcord--details-and-state ()
   "Obtain the details and state to use for Discord's Rich Presence."
@@ -367,9 +386,7 @@ or nil, if no text/icon are available for the current major mode."
 (defun elcord--set-presence ()
   "Set presence."
   (let* ((activity
-          `(("assets" . (("large_image" . ,elcord--editor-icon)
-                         ("large_text" . ,elcord--editor-name)
-                         ,@(elcord--mode-icon-and-text)))
+          `(("assets" . (,@(elcord--mode-icon-and-text)))
             ,@(elcord--details-and-state)))
          (nonce (format-time-string "%s%N"))
          (presence

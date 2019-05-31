@@ -86,6 +86,14 @@ Note, these icon names must be available as 'small_image' in Discord."
   :type '(alist :key-type symbol :value-type string)
   :group 'elcord)
 
+(defcustom elcord-display-elapsed 't
+  "When enabled, Discord status will display the elapsed time since Emacs \
+has been started."
+  :type 'boolean
+  :group 'elcord)
+
+(defvar elcord--startup-time (string-to-number (format-time-string "%s" (current-time))))
+
 (defcustom elcord-display-buffer-details 't
   "When enabled, Discord status will display buffer name and line numbers:
 \"Editing <buffer-name>\"
@@ -372,16 +380,19 @@ If no text is available, use the value of `mode-name'."
 
 (defun elcord--details-and-state ()
   "Obtain the details and state to use for Discord's Rich Presence."
-  (if elcord-display-buffer-details
-      (list
-       (cons "details" (format "Editing %s" (buffer-name)))
-       (cons "state" (format "Line %s (%s of %S)"
-                             (format-mode-line "%l")
-                             (format-mode-line "%l")
-                             (+ 1 (count-lines (point-min) (point-max))))))
-    (list
-     (cons "details" "Editing")
-     (cons "state" (elcord--mode-text)))))
+  (let ((activity (if elcord-display-buffer-details
+                     (list
+                      (cons "details" (format "Editing %s" (buffer-name)))
+                      (cons "state" (format "Line %s (%s of %S)"
+                                            (format-mode-line "%l")
+                                            (format-mode-line "%l")
+                                            (+ 1 (count-lines (point-min) (point-max))))))
+                   (list
+                    (cons "details" "Editing")
+                    (cons "state" (elcord--mode-text))))))
+    (if elcord-display-elapsed
+        (add-to-list 'activity `("timestamps" ("start" . ,elcord--startup-time)))
+      activity)))
 
 (defun elcord--set-presence ()
   "Set presence."

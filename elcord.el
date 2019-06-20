@@ -57,6 +57,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (java-mode . "java-mode_icon")
                                     (js-mode . "javascript-mode_icon")
                                     (kotlin-mode . "kotlin-mode_icon")
+                                    (go-mode . "go-mode_icon")
                                     (latex-mode . "latex-mode_icon")
                                     (lisp-mode . "lisp-mode_icon")
                                     (magit-mode . "magit-mode_icon")

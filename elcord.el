@@ -414,20 +414,21 @@ If no text is available, use the value of `mode-name'."
 
 (defun elcord--update-presence ()
   "Check if we changed our current line..."
-  (when (or (not (eq (count-lines (point-min) (point))
+  (when (and
+         (not (window-minibuffer-p))
+         (or (not (= (count-lines (point-min) (point))
                      elcord--last-known-position))
-            (not (string= (buffer-name) elcord--last-known-buffer-name)))
-    (progn
-      (setq elcord--last-known-buffer-name (buffer-name))
-      (setq elcord--last-known-position (count-lines (point-min) (point)))
-      (condition-case nil
-          ;;Try and set the presence
-          (elcord--set-presence)
-        (error
-         ;;If we hit an error, cancel updates
-         (elcord--cancel-updates)
-         ;; and try reconnecting
-         (elcord--start-reconnect))))))
+             (not (string= (buffer-name) elcord--last-known-buffer-name))))
+    (setq elcord--last-known-buffer-name (buffer-name))
+    (setq elcord--last-known-position (count-lines (point-min) (point)))
+    (condition-case nil
+        ;;Try and set the presence
+        (elcord--set-presence)
+      (error
+       ;;If we hit an error, cancel updates
+       (elcord--cancel-updates)
+       ;; and try reconnecting
+       (elcord--start-reconnect)))))
 
 (defun elcord--start-updates ()
   "Start sending periodic update to Discord Rich Presence."

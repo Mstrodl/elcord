@@ -226,8 +226,8 @@ Unused on other platforms.")
 (defun elcord--empty-presence ()
   "Sends an empty presence for when elcord is disabled"
   (let* ((activity
-	  `(("details" . "Emacs"))) ;; For the time being we have to send a presence after we connect, we can't empty it :/
-	 (nonce (format-time-string "%s%N"))
+          `(("details" . "Emacs"))) ;; For the time being we have to send a presence after we connect, we can't empty it :/
+         (nonce (format-time-string "%s%N"))
          (presence
            `(("cmd" . "SET_ACTIVITY")
              ("args" . (("activity" . ,activity)

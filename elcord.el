@@ -203,6 +203,7 @@ Unused on other platforms.")
 
 (defun elcord--enable ()
   "Called when variable ‘elcord-mode’ is enabled."
+  (setq elcord--startup-time (string-to-number (format-time-string "%s" (current-time))))
   (unless (elcord--resolve-client-id)
     (warn "elcord: no elcord-client-id available"))
   (when (eq system-type 'windows-nt)

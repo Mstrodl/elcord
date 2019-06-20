@@ -52,6 +52,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (emacs-lisp-mode . "emacs_icon")
                                     (enh-ruby-mode . "ruby-mode_icon")
                                     (erc-mode . "irc-mode_icon")
+                                    (forth-mode . "forth-mode_icon")
                                     (fsharp-mode . "fsharp-mode_icon")
                                     (haskell-mode . "haskell-mode_icon")
                                     (java-mode . "java-mode_icon")

@@ -397,9 +397,9 @@ If no text is available, use the value of `mode-name'."
                    (list
                     (cons "details" "Editing")
                     (cons "state" (elcord--mode-text))))))
-    (if elcord-display-elapsed
-        (add-to-list 'activity `("timestamps" ("start" . ,elcord--startup-time)))
-      activity)))
+    (when elcord-display-elapsed
+      (push (list "timestamps" (cons "start" elcord--startup-time)) activity))
+    activity))
 
 (defun elcord--set-presence ()
   "Set presence."

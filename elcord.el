@@ -137,12 +137,14 @@ The mode text is the same found by `elcord-mode-text-alist'"
 (defvar elcord--editor-name
   (cond
    ((boundp 'spacemacs-version) "Spacemacs")
+   ((boundp 'doom-version) "DOOM Emacs")
    (t "Emacs"))
   "The name to use to represent the current editor.")
 
 (defvar elcord--editor-icon
   (cond
    ((boundp 'spacemacs-version) "spacemacs_icon")
+   ((boundp 'doom-version) "doom_icon")
    (t "emacs_icon"))
   "The icon to use to represent the current editor.")
 

@@ -63,6 +63,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (lisp-mode . "lisp-mode_icon")
                                     (magit-mode . "magit-mode_icon")
                                     (markdown-mode . "markdown-mode_icon")
+                                    (nix-mode . "nix-mode_icon")
                                     (org-mode . "org-mode_icon")
                                     (racket-mode . "racket-mode_icon")
                                     (ruby-mode . "ruby-mode_icon")

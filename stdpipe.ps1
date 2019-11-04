@@ -30,13 +30,18 @@ public static class StdPipe
             ReadFromStdinAsync(stdBuffer, 0, stdBuffer.Length)
         };
 
-        while(true)
+        while (true)
         {
             var doneIdx = Task.WaitAny(tasks);
 
             var bytesRead = tasks[doneIdx].Result;
             if (doneIdx == 0)
             {//Input from pipe
+             if (bytesRead == 0)
+             {// If the pipe has closed out on us, punk out
+                 break;
+             }
+
              Console.Out.Write(pipeBuffer, 0, bytesRead);
              Console.Out.Flush();
              tasks[doneIdx] = pipeReader.ReadAsync(pipeBuffer, 0, pipeBuffer.Length);

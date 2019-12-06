@@ -441,6 +441,8 @@ If no text is available, use the value of `mode-name'."
   (unless elcord--update-presence-timer
     (message "elcord: connected. starting updates")
     ;;Start sending updates now that we've heard from discord
+    (setq elcord--last-known-position -1
+          elcord--last-known-buffer-name "")
     (setq elcord--update-presence-timer (run-at-time 0 15 'elcord--update-presence))))
 
 (defun elcord--cancel-updates ()

@@ -189,7 +189,7 @@ Unused on other platforms.")
       :connection-type 'pipe
       :sentinel 'elcord--connection-sentinel
       :filter 'elcord--connection-filter
-      :noquery nil))
+      :noquery t))
     (t
      (make-network-process
       :name "*elcord-sock*"
@@ -203,7 +203,7 @@ Unused on other platforms.")
                     "/tmp")))
       :sentinel 'elcord--connection-sentinel
       :filter 'elcord--connection-filter
-      :noquery nil))))
+      :noquery t))))
 
 (defun elcord--enable ()
   "Called when variable ‘elcord-mode’ is enabled."

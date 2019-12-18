@@ -225,8 +225,12 @@ Unused on other platforms.")
   (elcord--cancel-updates)
   ;;Cancel any reconnect attempt
   (elcord--cancel-reconnect)
-  ;;Empty our presence
-  (elcord--empty-presence)
+
+  ;;If we're currently connected
+  (when elcord--sock
+    ;;Empty our presence
+    (elcord--empty-presence))
+
   (elcord--disconnect))
 
 (defun elcord--empty-presence ()
@@ -268,17 +272,19 @@ Argument EVNT The available output from the process."
 
 (defun elcord--connect ()
   "Connects to the Discord socket."
-  (condition-case nil
-      (progn
-        (setq elcord--sock (elcord--make-process))
-        (condition-case nil
-            (elcord--send-packet 0 `(("v" . 1) ("client_id" . ,(elcord--resolve-client-id))))
-          (error
-           (delete-process elcord--sock)
-           (setq elcord--sock nil)))
-        t)
-    (error
-     nil)))
+  (or elcord--sock
+      (condition-case nil
+          (progn
+            (message "elcord: attempting reconnect..")
+            (setq elcord--sock (elcord--make-process))
+            (condition-case nil
+                (elcord--send-packet 0 `(("v" . 1) ("client_id" . ,(elcord--resolve-client-id))))
+              (error
+               (delete-process elcord--sock)
+               (setq elcord--sock nil)))
+            t)
+        (error
+         nil))))
 
 (defun elcord--disconnect ()
   "Disconnect elcord."
@@ -288,15 +294,16 @@ Argument EVNT The available output from the process."
 
 (defun elcord--reconnect ()
   "Attempt to reconnect elcord."
-  (message "elcord: attempting reconnect..")
   (when (elcord--connect)
     ;;Reconnected.
-    (message "elcord: connecting...")
+    ;; Put a pending message unless we already got first handshake
+    (unless elcord--update-presence-timer
+      (message "elcord: connecting..."))
     (elcord--cancel-reconnect)))
 
 (defun elcord--start-reconnect ()
   "Start attempting to reconnect."
-  (unless elcord--reconnect-timer
+  (unless (or elcord--sock elcord--reconnect-timer)
     (setq elcord--reconnect-timer (run-at-time 0 15 'elcord--reconnect))))
 
 (defun elcord--cancel-reconnect ()
@@ -310,9 +317,9 @@ Argument EVNT The available output from the process."
   (message "elcord: disconnected")
   ;;Stop updating presence for now
   (elcord--cancel-updates)
+  (setq elcord--sock nil)
   ;;Start trying to reconnect
-  (when
-      (bound-and-true-p elcord-mode)
+  (when elcord-mode
     (elcord--start-reconnect)))
 
 (defun elcord--send-packet (opcode obj)

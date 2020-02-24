@@ -68,6 +68,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (racket-mode . "racket-mode_icon")
                                     (ruby-mode . "ruby-mode_icon")
                                     (rust-mode . "rust-mode_icon")
+                                    (rustic-mode . "rust-mode_icon")
                                     (slime-repl-mode . "lisp-mode_icon")
                                     (sly-mrepl-mode . "lisp-mode_icon")
                                     (php-mode . "php-mode_icon")

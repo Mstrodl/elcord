@@ -43,6 +43,11 @@ See <https://discordapp.com/developers/applications/me>."
                  (function :tag "Call the function with no args to get the ID."))
   :group 'elcord)
 
+(defcustom elcord-refresh-rate 15
+  "How often to send updates to Discord, in seconds."
+  :type 'integer
+  :group 'elcord)
+
 (defcustom elcord-mode-icon-alist '((c-mode . "c-mode_icon")
                                     (c++-mode . "cpp-mode_icon")
                                     (clojure-mode . "clojure-mode_icon")
@@ -452,7 +457,7 @@ If no text is available, use the value of `mode-name'."
     ;;Start sending updates now that we've heard from discord
     (setq elcord--last-known-position -1
           elcord--last-known-buffer-name "")
-    (setq elcord--update-presence-timer (run-at-time 0 15 'elcord--update-presence))))
+    (setq elcord--update-presence-timer (run-at-time 0 elcord-refresh-rate 'elcord--update-presence))))
 
 (defun elcord--cancel-updates ()
   "Stop sending periodic update to Discord Rich Presence."

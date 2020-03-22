@@ -126,6 +126,11 @@ The mode text is the same found by `elcord-mode-text-alist'"
   :type 'boolean
   :group 'elcord)
 
+(defcustom elcord-show-small-icon 't
+  "When enabled, show the small icon as well as the main icon."
+  :type 'boolean
+  :group 'elcord)
+
 ;;;###autoload
 (define-minor-mode elcord-mode
   "Global minor mode for displaying Rich Presence in Discord."
@@ -397,11 +402,18 @@ If no text is available, use the value of `mode-name'."
             large-icon elcord--editor-icon
             small-text text
             small-icon icon)))
-    (list
-     (cons "large_text" large-text)
-     (cons "large_image" large-icon)
-     (cons "small_text" small-text)
-     (cons "small_image" small-icon))))
+    (cond
+     (elcord-show-small-icon
+      (list
+       (cons "large_text" large-text)
+       (cons "large_image" large-icon)
+       (cons "small_text" small-text)
+       (cons "small_image" small-icon)))
+     (t
+      (list
+       (cons "large_text" large-text)
+       (cons "large_image" large-icon)
+       (cons "small_text" small-text))))))
 
 (defun elcord--details-and-state ()
   "Obtain the details and state to use for Discord's Rich Presence."

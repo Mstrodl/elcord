@@ -260,7 +260,7 @@ Unused on other platforms.")
 (defun elcord--resolve-client-id ()
   "Evaluate `elcord-client-id' and return the client ID to use."
   (cl-typecase elcord-client-id
-    (nil
+    (null
      nil)
     (string
      elcord-client-id)

@@ -285,18 +285,15 @@ Argument EVNT The available output from the process."
 (defun elcord--connect ()
   "Connects to the Discord socket."
   (or elcord--sock
-      (condition-case nil
-          (progn
-            (message "elcord: attempting reconnect..")
-            (setq elcord--sock (elcord--make-process))
-            (condition-case nil
-                (elcord--send-packet 0 `(("v" . 1) ("client_id" . ,(elcord--resolve-client-id))))
-              (error
-               (delete-process elcord--sock)
-               (setq elcord--sock nil)))
-            t)
-        (error
-         nil))))
+      (ignore-errors
+        (message "elcord: attempting reconnect..")
+        (setq elcord--sock (elcord--make-process))
+        (condition-case nil
+            (elcord--send-packet 0 `(("v" . 1) ("client_id" . ,(elcord--resolve-client-id))))
+          (error
+           (delete-process elcord--sock)
+           (setq elcord--sock nil)))
+        elcord--sock)))
 
 (defun elcord--disconnect ()
   "Disconnect elcord."

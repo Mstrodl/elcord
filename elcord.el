@@ -454,6 +454,8 @@ If no text is available, use the value of `mode-name'."
       (error
        ;;If we hit an error, cancel updates
        (elcord--cancel-updates)
+       ;; Disconnect
+       (elcord--disconnect)
        ;; and try reconnecting
        (elcord--start-reconnect)))))
 

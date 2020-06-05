@@ -358,9 +358,8 @@ If no icon is available, use the default icon."
         (ret elcord--editor-icon))
     (while mode
       (if-let ((icon (assoc mode elcord-mode-icon-alist)))
-          (progn
-            (setq ret (cdr icon))
-            (setq mode nil))
+          (setq ret (cdr icon)
+                mode nil)
         (setq mode (get mode 'derived-mode-parent))))
     ret))
 
@@ -373,9 +372,8 @@ If no text is available, use the value of `mode-name'."
         (ret mode-name))
     (while mode
       (if-let ((text (assoc mode elcord-mode-text-alist)))
-          (progn
-            (setq ret (cdr text))
-            (setq mode nil))
+          (setq ret (cdr text)
+                mode nil)
         (setq mode (get mode 'derived-mode-parent))))
     ret))
 
@@ -448,8 +446,8 @@ If no text is available, use the value of `mode-name'."
          (or (not (= (count-lines (point-min) (point))
                      elcord--last-known-position))
              (not (string= (buffer-name) elcord--last-known-buffer-name))))
-    (setq elcord--last-known-buffer-name (buffer-name))
-    (setq elcord--last-known-position (count-lines (point-min) (point)))
+    (setq elcord--last-known-buffer-name (buffer-name)
+          elcord--last-known-position (count-lines (point-min) (point)))
     (condition-case nil
         ;;Try and set the presence
         (elcord--set-presence)
@@ -465,8 +463,8 @@ If no text is available, use the value of `mode-name'."
     (message "elcord: connected. starting updates")
     ;;Start sending updates now that we've heard from discord
     (setq elcord--last-known-position -1
-          elcord--last-known-buffer-name "")
-    (setq elcord--update-presence-timer (run-at-time 0 elcord-refresh-rate 'elcord--update-presence))))
+          elcord--last-known-buffer-name ""
+          elcord--update-presence-timer (run-at-time 0 elcord-refresh-rate 'elcord--update-presence))))
 
 (defun elcord--cancel-updates ()
   "Stop sending periodic update to Discord Rich Presence."

@@ -93,6 +93,7 @@ Note, these icon names must be available as 'small_image' in Discord."
                                     (lisp-mode . "Common-Lisp")
                                     (markdown-mode . "Markdown")
                                     (magit-mode . "It's Magit!")
+				    (mhtml-mode . "HTML")
                                     (slime-repl-mode . "SLIME-REPL")
                                     (sly-mrepl-mode . "Sly-REPL")
                                     (php-mode "PHP"))
@@ -375,6 +376,8 @@ If no text is available, use the value of `mode-name'."
           (setq ret (cdr text)
                 mode nil)
         (setq mode (get mode 'derived-mode-parent))))
+    (unless (stringp ret)
+      (setq ret (format "%s" ret)))
     ret))
 
 (defun elcord--mode-icon-and-text ()

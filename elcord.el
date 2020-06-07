@@ -8,7 +8,7 @@
 ;; Version: 1.0.0
 ;; Keywords: games
 ;; Homepage: https://github.com/Mstrodl/elcord
-;; Package-Requires: ((emacs "25"))
+;; Package-Requires: ((emacs "25.1"))
 ;; License: MIT
 
 ;;; Commentary:
@@ -93,7 +93,7 @@ Note, these icon names must be available as 'small_image' in Discord."
                                     (lisp-mode . "Common-Lisp")
                                     (markdown-mode . "Markdown")
                                     (magit-mode . "It's Magit!")
-                                    (mhtml-mode . "HTML")
+                                    ("mhtml-mode" . "HTML")
                                     (slime-repl-mode . "SLIME-REPL")
                                     (sly-mrepl-mode . "Sly-REPL")
                                     (php-mode "PHP"))
@@ -247,7 +247,7 @@ Unused on other platforms.")
   (elcord--disconnect))
 
 (defun elcord--empty-presence ()
-  "Sends an empty presence for when elcord is disabled"
+  "Sends an empty presence for when elcord is disabled."
   (let* ((activity
           `(("details" . "Emacs"))) ;; For the time being we have to send a presence after we connect, we can't empty it :/
          (nonce (format-time-string "%s%N"))
@@ -381,36 +381,37 @@ If no text is available, use the value of `mode-name'."
     ret))
 
 (defun elcord--mode-icon-and-text ()
-  "Obtain the icon & text to use for the large/small icon, using current major mode.
-  ((\"large_text\" . <text>)
-   (\"large_image\" . <icon-name>)
-   (\"small_text\" . <text>)
-   (\"small_image\" . <icon-name>))"
+  "Obtain the icon & text to use for the current major mode.
+\((\"large_text\" . <text>)
+  (\"large_image\" . <icon-name>)
+  (\"small_text\" . <text>)
+  (\"small_image\" . <icon-name>))"
   (let ((text (elcord--mode-text))
         (icon (elcord--mode-icon))
-        large-text large-image small-text small-image)
+        large-text large-image
+        small-text small-image)
     (cond
      (elcord-use-major-mode-as-main-icon
       (setq large-text text
-            large-icon icon
+            large-image icon
             small-text elcord--editor-name
-            small-icon elcord--editor-icon))
+            small-image elcord--editor-icon))
      (t
       (setq large-text elcord--editor-name
-            large-icon elcord--editor-icon
+            large-image elcord--editor-icon
             small-text text
-            small-icon icon)))
+            small-image icon)))
     (cond
      (elcord-show-small-icon
       (list
        (cons "large_text" large-text)
-       (cons "large_image" large-icon)
+       (cons "large_image" large-image)
        (cons "small_text" small-text)
-       (cons "small_image" small-icon)))
+       (cons "small_image" small-image)))
      (t
       (list
        (cons "large_text" large-text)
-       (cons "large_image" large-icon)
+       (cons "large_image" large-image)
        (cons "small_text" small-text))))))
 
 (defun elcord--details-and-state ()

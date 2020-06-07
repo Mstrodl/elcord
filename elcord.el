@@ -5,7 +5,7 @@
 ;; Author: heatingdevice
 ;;      Wilfredo Velázquez-Rodríguez <zulu.inuoe@gmail.com>
 ;; Created: 21 Nov 2017
-;; Version: 1.0.0
+;; Version: 1.1.0
 ;; Keywords: games
 ;; Homepage: https://github.com/Mstrodl/elcord
 ;; Package-Requires: ((emacs "25.1"))
@@ -74,13 +74,16 @@ See <https://discordapp.com/developers/applications/me>."
                                     (ruby-mode . "ruby-mode_icon")
                                     (rust-mode . "rust-mode_icon")
                                     (rustic-mode . "rust-mode_icon")
-                                    (slime-repl-mode . "lisp-mode_icon")
-                                    (sly-mrepl-mode . "lisp-mode_icon")
+                                    ("^slime-.*" . "lisp-mode_icon")
+                                    ("^sly-.*$" . "lisp-mode_icon")
                                     (php-mode . "php-mode_icon")
                                     (python-mode . "python-mode_icon"))
   "Mapping alist of major modes to icon names to have elcord use.
 Note, these icon names must be available as 'small_image' in Discord."
-  :type '(alist :key-type symbol :value-type string)
+  :type '(alist :key-type (choice (symbol :tag "Mode name")
+                                  (regexp :tag "Regex"))
+                :value-type (choice (string :tag "Icon name")
+                                    (function :tag "Mapping function")))
   :group 'elcord)
 
 (defcustom elcord-mode-text-alist '((c-mode . "C  ")
@@ -98,7 +101,10 @@ Note, these icon names must be available as 'small_image' in Discord."
                                     (sly-mrepl-mode . "Sly-REPL")
                                     (php-mode "PHP"))
   "Mapping alist of major modes to text labels to have elcord use."
-  :type '(alist :key-type symbol :value-type string)
+  :type '(alist :key-type (choice (symbol :tag "Mode name")
+                                  (regexp :tag "Regex"))
+                :value-type (choice (string :tag "Text label")
+                                    (function :tag "Mapping function")))
   :group 'elcord)
 
 (defcustom elcord-display-elapsed 't
@@ -350,6 +356,37 @@ Argument OBJ The data to send to the IPC server."
              (:data . ,jsonstr)))))
     (process-send-string elcord--sock packet)))
 
+(defun elcord--test-match-p (test mode)
+  "Test `MODE' against `TEST'.
+if `test' is a symbol, it is compared directly to `mode'.
+if `test' is a string, it is a regex to compare against the name of `mode'."
+  (cl-typecase test
+    (symbol (eq test mode))
+    (string (string-match-p test (symbol-name mode)))))
+
+(defun elcord--entry-value (entry mode)
+  "Test `ENTRY' against `MODE'.  Return the value of `ENTRY'.
+`entry' is a cons who's `car' is `elcord--test-match-p' with `mode''
+When `mode' matches, if the `cdr' of `entry' is a string, return that,
+otherwise if it is a function, call it with `mode' and return that value."
+  (when (elcord--test-match-p (car entry) mode)
+    (let ((mapping (cdr entry)))
+      (cl-typecase mapping
+        (string mapping)
+        (function (funcall mapping mode))))))
+
+(defun elcord--find-mode-entry (alist mode)
+  "Get the first entry in `ALIST' matching `MODE'.
+`alist' Should be an alist like `elcord-mode-icon-alist' where each value is
+ either a string,or a function of one argument `mode'.
+ If it is a function, it should return a string, or nil if no match."
+  (let ((cell alist)
+        (result nil))
+    (while cell
+      (setq result (elcord--entry-value (car cell) mode)
+            cell (if result nil (cdr cell))))
+    result))
+
 (defun elcord--mode-icon ()
   "Figure out what icon to use for the current major mode.
 If an icon is mapped by `elcord-mode-icon-alist', then that is used.
@@ -358,8 +395,8 @@ If no icon is available, use the default icon."
   (let ((mode major-mode)
         (ret elcord--editor-icon))
     (while mode
-      (if-let ((icon (assoc mode elcord-mode-icon-alist)))
-          (setq ret (cdr icon)
+      (if-let ((icon (elcord--find-mode-entry elcord-mode-icon-alist mode)))
+          (setq ret icon
                 mode nil)
         (setq mode (get mode 'derived-mode-parent))))
     ret))
@@ -372,8 +409,8 @@ If no text is available, use the value of `mode-name'."
   (let ((mode major-mode)
         (ret mode-name))
     (while mode
-      (if-let ((text (assoc mode elcord-mode-text-alist)))
-          (setq ret (cdr text)
+      (if-let ((text (elcord--find-mode-entry elcord-mode-text-alist mode)))
+          (setq ret text
                 mode nil)
         (setq mode (get mode 'derived-mode-parent))))
     (unless (stringp ret)

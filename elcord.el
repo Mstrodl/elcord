@@ -93,7 +93,7 @@ Note, these icon names must be available as 'small_image' in Discord."
                                     (lisp-mode . "Common-Lisp")
                                     (markdown-mode . "Markdown")
                                     (magit-mode . "It's Magit!")
-				    (mhtml-mode . "HTML")
+                                    (mhtml-mode . "HTML")
                                     (slime-repl-mode . "SLIME-REPL")
                                     (sly-mrepl-mode . "Sly-REPL")
                                     (php-mode "PHP"))
@@ -252,10 +252,10 @@ Unused on other platforms.")
           `(("details" . "Emacs"))) ;; For the time being we have to send a presence after we connect, we can't empty it :/
          (nonce (format-time-string "%s%N"))
          (presence
-           `(("cmd" . "SET_ACTIVITY")
-             ("args" . (("activity" . ,activity)
-                        ("pid" . ,(emacs-pid))))
-             ("nonce" . ,nonce))))
+          `(("cmd" . "SET_ACTIVITY")
+            ("args" . (("activity" . ,activity)
+                       ("pid" . ,(emacs-pid))))
+            ("nonce" . ,nonce))))
     (elcord--send-packet 1 presence)))
 
 (defun elcord--resolve-client-id ()
@@ -416,15 +416,15 @@ If no text is available, use the value of `mode-name'."
 (defun elcord--details-and-state ()
   "Obtain the details and state to use for Discord's Rich Presence."
   (let ((activity (if elcord-display-buffer-details
-                     (list
-                      (cons "details" (format "Editing %s" (buffer-name)))
-                      (cons "state" (format "Line %s (%s of %S)"
-                                            (format-mode-line "%l")
-                                            (format-mode-line "%l")
-                                            (+ 1 (count-lines (point-min) (point-max))))))
-                   (list
-                    (cons "details" "Editing")
-                    (cons "state" (elcord--mode-text))))))
+                      (list
+                       (cons "details" (format "Editing %s" (buffer-name)))
+                       (cons "state" (format "Line %s (%s of %S)"
+                                             (format-mode-line "%l")
+                                             (format-mode-line "%l")
+                                             (+ 1 (count-lines (point-min) (point-max))))))
+                    (list
+                     (cons "details" "Editing")
+                     (cons "state" (elcord--mode-text))))))
     (when elcord-display-elapsed
       (push (list "timestamps" (cons "start" elcord--startup-time)) activity))
     activity))
@@ -436,10 +436,10 @@ If no text is available, use the value of `mode-name'."
             ,@(elcord--details-and-state)))
          (nonce (format-time-string "%s%N"))
          (presence
-           `(("cmd" . "SET_ACTIVITY")
-             ("args" . (("activity" . ,activity)
-                        ("pid" . ,(emacs-pid))))
-             ("nonce" . ,nonce))))
+          `(("cmd" . "SET_ACTIVITY")
+            ("args" . (("activity" . ,activity)
+                       ("pid" . ,(emacs-pid))))
+            ("nonce" . ,nonce))))
     (elcord--send-packet 1 presence)))
 
 (defun elcord--update-presence ()

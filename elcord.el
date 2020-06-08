@@ -138,6 +138,13 @@ The mode text is the same found by `elcord-mode-text-alist'"
   :type 'boolean
   :group 'elcord)
 
+(defcustom elcord-boring-buffers-regexp-list '("^ "
+                                               "\\\\*Messages\\\\*")
+  "A list of regexp's to match boring buffers.
+When visiting a boring buffer, it will not show in the elcord presence."
+  :type '(repeat regexp)
+  :group 'elcord)
+
 ;;;###autoload
 (define-minor-mode elcord-mode
   "Global minor mode for displaying Rich Presence in Discord."
@@ -480,25 +487,57 @@ If no text is available, use the value of `mode-name'."
             ("nonce" . ,nonce))))
     (elcord--send-packet 1 presence)))
 
+(defun elcord--buffer-boring-p (buffer-name)
+  "Return non-nil if `BUFFER-NAME' is non-boring per `ELCORD-BORING-BUFFERS-REGEXP-LIST'."
+  (let ((cell elcord-boring-buffers-regexp-list)
+        (result nil))
+    (while cell
+      (if (string-match-p (car cell) buffer-name)
+          (setq result t
+                cell nil)
+        (setq cell (cdr cell))))
+    result))
+
+(defun elcord--find-non-boring-window ()
+  "Try to find a live window displaying a non-boring buffer."
+  (let ((cell (window-list))
+        (result nil))
+    (while cell
+      (let ((window (car cell)))
+        (if (not (elcord--buffer-boring-p (buffer-name (window-buffer window))))
+            (setq result window
+                  cell nil)
+          (setq cell (cdr cell)))))
+    result))
+
+(defun elcord--try-update-presence (new-buffer-name new-buffer-position)
+  "Try updating presence with `NEW-BUFFER-NAME' and `NEW-BUFFER-POSITION' while handling errors and disconnections."
+  (setq elcord--last-known-buffer-name new-buffer-name
+        elcord--last-known-position new-buffer-position)
+  (condition-case nil
+      ;;Try and set the presence
+      (elcord--set-presence)
+    (error
+     ;;If we hit an error, cancel updates
+     (elcord--cancel-updates)
+     ;; Disconnect
+     (elcord--disconnect)
+     ;; and try reconnecting
+     (elcord--start-reconnect))))
+
 (defun elcord--update-presence ()
-  "Check if we changed our current line..."
-  (when (and
-         (not (window-minibuffer-p))
-         (or (not (= (count-lines (point-min) (point))
-                     elcord--last-known-position))
-             (not (string= (buffer-name) elcord--last-known-buffer-name))))
-    (setq elcord--last-known-buffer-name (buffer-name)
-          elcord--last-known-position (count-lines (point-min) (point)))
-    (condition-case nil
-        ;;Try and set the presence
-        (elcord--set-presence)
-      (error
-       ;;If we hit an error, cancel updates
-       (elcord--cancel-updates)
-       ;; Disconnect
-       (elcord--disconnect)
-       ;; and try reconnecting
-       (elcord--start-reconnect)))))
+  "Conditionally update presence by testing the current buffer/line.
+If there is no 'previous' buffer attempt to find a non-boring buffer to initialize to."
+  (if (= elcord--last-known-position -1)
+      (when-let ((window (elcord--find-non-boring-window)))
+        (with-current-buffer (window-buffer window)
+          (elcord--try-update-presence (buffer-name) (count-lines (point-min) (point)))))
+    (let ((new-buffer-name (buffer-name (current-buffer))))
+      (unless (elcord--buffer-boring-p new-buffer-name)
+        (let ((new-buffer-position (count-lines (point-min) (point))))
+          (unless (and (string= new-buffer-name elcord--last-known-buffer-name)
+                       (= new-buffer-position elcord--last-known-position))
+            (elcord--try-update-presence new-buffer-name new-buffer-position)))))))
 
 (defun elcord--start-updates ()
   "Start sending periodic update to Discord Rich Presence."

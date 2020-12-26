@@ -201,10 +201,10 @@ On Windows, this script is used as a proxy for the Discord named pipe.
 Unused on other platforms.")
 
 (defvar elcord--wslrelay-path (expand-file-name
-                              "wslrelay.sh"
-                              (file-name-directory (file-truename load-file-name)))
-  "Path to the 'stdpipe' script.
-On Windows, this script is used as a proxy for the Discord named pipe.
+                               "wslrelay.sh"
+                               (file-name-directory (file-truename load-file-name)))
+  "Path to the 'wslrelay' script.
+On the Windows Subsystem for Linux, this script is used as a proxy for the Discord named pipe.
 Unused on other platforms.")
 
 (defun elcord--make-process ()
@@ -260,9 +260,17 @@ Unused on other platforms.")
       (warn "elcord: powershell not available"))
     (unless (file-exists-p elcord--stdpipe-path)
       (warn "elcord: 'stdpipe' script does not exist (%s)" elcord--stdpipe-path)))
+  (when (string= (shell-command-to-string "uname -r | sed -n 's/.*\\( *Microsoft *\\).*/\1/ip'") "\n")
+    (unless (executable-find "socat")
+      (warn "elcord: socat not available"))
+    (unless (executable-find "npiperelay.exe")
+      (warn "elcord: npiperelay.exe not available"))
+    (unless (file-exists-p elcord--wslrelay-path)
+      (warn "elcord: 'wslrelay' script does not exist (%s)" elcord--wslrelay-path)))
 
   ;;Start trying to connect
   (elcord--start-reconnect))
+
 
 (defun elcord--disable ()
   "Called when variable ‘elcord-mode’ is disabled."

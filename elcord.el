@@ -200,6 +200,13 @@ nil when elcord is not active.")
 On Windows, this script is used as a proxy for the Discord named pipe.
 Unused on other platforms.")
 
+(defvar elcord--wslrelay-path (expand-file-name
+                              "wslrelay.sh"
+                              (file-name-directory (file-truename load-file-name)))
+  "Path to the 'stdpipe' script.
+On Windows, this script is used as a proxy for the Discord named pipe.
+Unused on other platforms.")
+
 (defun elcord--make-process ()
   "Make the asynchronous process that communicates with Discord IPC."
   (let ((default-directory "~/"))
@@ -217,19 +224,31 @@ Unused on other platforms.")
         :filter 'elcord--connection-filter
         :noquery t))
       (t
-       (make-network-process
-        :name "*elcord-sock*"
-        :remote (expand-file-name
-                 elcord--discord-ipc-pipe
-                 (file-name-as-directory
-                  (or (getenv "XDG_RUNTIME_DIR")
-                      (getenv "TMPDIR")
-                      (getenv "TMP")
-                      (getenv "TEMP")
-                      "/tmp")))
-        :sentinel 'elcord--connection-sentinel
-        :filter 'elcord--connection-filter
-        :noquery t)))))
+       (if (string= (shell-command-to-string "uname -r | sed -n 's/.*\\( *Microsoft *\\).*/\1/ip'") "\n")
+           (make-process
+            :name "*elcord-sock*"
+            :command (list
+                      elcord--wslrelay-path
+                      elcord--discord-ipc-pipe)
+            :buffer (get-buffer-create "proc")
+            :connection-type 'pipe
+            :sentinel 'elcord--connection-sentinel
+            :filter 'elcord--connection-filter
+            :noquery t)
+         (make-network-process
+          :name "*elcord-sock*"
+          :remote (expand-file-name
+                   elcord--discord-ipc-pipe
+                   (file-name-as-directory
+                    (or (getenv "XDG_RUNTIME_DIR")
+                        (getenv "TMPDIR")
+                        (getenv "TMP")
+                        (getenv "TEMP")
+                        "/tmp")))
+          :sentinel 'elcord--connection-sentinel
+          :filter 'elcord--connection-filter
+          :noquery t))
+       ))))
 
 (defun elcord--enable ()
   "Called when variable ‘elcord-mode’ is enabled."

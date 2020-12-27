@@ -30,6 +30,13 @@ Make sure that the [stdpipe.ps1](stdpipe.ps1) is in the same directory as the [e
 Talking with Discord's IPC mechanism is achieves through this PowerShell script to get around Emacs' inability to talk through named pipes on Windows.
 Everything should work out-of-the-box. Just make sure this PowerShell script is installed in the same directory as your [elcord.el](elcord.el) file.
 
+#### Note for WSL
+
+You'll need [npiperelay](https://github.com/jstarks/npiperelay) installed.
+[npiperelay](https://github.com/jstarks/npiperelay) is used to talk with Discord's IPC mechanism at the windows side.
+
+Everything should work out-of-the-box. Just make sure that [npiperelay](https://github.com/jstarks/npiperelay) is installed and [wslrelay](wslrelay.sh) is in the same directory as your [elcord.el](elcord.el) file.
+
 ## Usage
 
 After installing, enable `elcord-mode`.

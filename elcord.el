@@ -48,6 +48,11 @@ See <https://discordapp.com/developers/applications/me>."
   :type 'integer
   :group 'elcord)
 
+(defcustom elcord-idle-timer nil
+  "How long to wait before elcord goes idle"
+  :type 'integer
+  :group 'elcord)
+
 (defcustom elcord-mode-icon-alist '((c-mode . "c-mode_icon")
                                     (c++-mode . "cpp-mode_icon")
                                     (clojure-mode . "clojure-mode_icon")
@@ -241,6 +246,9 @@ Unused on other platforms.")
       (warn "elcord: powershell not available"))
     (unless (file-exists-p elcord--stdpipe-path)
       (warn "elcord: 'stdpipe' script does not exist (%s)" elcord--stdpipe-path)))
+  (if elcord-idle-timer
+      (run-with-idle-timer
+       elcord-idle-timer t 'elcord--idle-handler))
 
   ;;Start trying to connect
   (elcord--start-reconnect))
@@ -553,6 +561,29 @@ If there is no 'previous' buffer attempt to find a non-boring buffer to initiali
   (when elcord--update-presence-timer
     (cancel-timer elcord--update-presence-timer)
     (setq elcord--update-presence-timer nil)))
+
+(defun elcord--idle-handler ()
+  ;;pause time
+  (setq elcord--startup-time (time-subtract (current-time) elcord--startup-time))
+  (let* ((activity
+          `(("assets" . (,@(elcord--mode-icon-and-text)))
+            ("timestamps" ("start" ,@(string-to-number (format-time-string "%s" (current-time)))))
+            ("details" . "Idle") ("state" .  "Idle text")))
+         (nonce (format-time-string "%s%N"))
+         (presence
+          `(("cmd" . "SET_ACTIVITY")
+            ("args" . (("activity" . ,activity)
+                       ("pid" . ,(emacs-pid))))
+            ("nonce" . ,nonce))))
+    (elcord--send-packet 1 presence))
+
+  (add-hook 'pre-command-hook 'elcord--idle-handler-function))
+
+(defun elcord--idle-handler-function ()
+  (remove-hook 'pre-command-hook 'elcord--idle-handler-function)
+  ;;resume timer
+  (setq elcord--startup-time (string-to-number (format-time-string "%s" (time-subtract (current-time) elcord--startup-time)))))
+
 
 (provide 'elcord)
 ;;; elcord.el ends here

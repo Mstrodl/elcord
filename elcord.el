@@ -230,7 +230,6 @@ Unused on other platforms.")
             :command (list
                       elcord--wslrelay-path
                       elcord--discord-ipc-pipe)
-            :buffer (get-buffer-create "proc")
             :connection-type 'pipe
             :sentinel 'elcord--connection-sentinel
             :filter 'elcord--connection-filter
@@ -261,8 +260,6 @@ Unused on other platforms.")
     (unless (file-exists-p elcord--stdpipe-path)
       (warn "elcord: 'stdpipe' script does not exist (%s)" elcord--stdpipe-path)))
   (when (string= (shell-command-to-string "uname -r | sed -n 's/.*\\( *Microsoft *\\).*/\1/ip'") "\n")
-    (unless (executable-find "socat")
-      (warn "elcord: socat not available"))
     (unless (executable-find "npiperelay.exe")
       (warn "elcord: npiperelay.exe not available"))
     (unless (file-exists-p elcord--wslrelay-path)

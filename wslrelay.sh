@@ -8,4 +8,4 @@ for i in $(pstree -np -s $$ | grep -o -E '[0-9]+'); do
     fi
 done
 
-exec socat -d stdio EXEC:"npiperelay.exe -ep -s //./pipe/$1",nofork
+exec npiperelay.exe -ep -s //./pipe/$1

@@ -74,6 +74,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (ruby-mode . "ruby-mode_icon")
                                     (rust-mode . "rust-mode_icon")
                                     (rustic-mode . "rust-mode_icon")
+                                    (zig-mode . "zig-mode_icon")
                                     ("^slime-.*" . "lisp-mode_icon")
                                     ("^sly-.*$" . "lisp-mode_icon")
                                     (php-mode . "php-mode_icon")

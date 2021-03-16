@@ -60,6 +60,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (forth-mode . "forth-mode_icon")
                                     (fsharp-mode . "fsharp-mode_icon")
                                     (haskell-mode . "haskell-mode_icon")
+                                    (haskell-interactive-mode . "haskell-mode_icon")
                                     (java-mode . "java-mode_icon")
                                     (js-mode . "javascript-mode_icon")
                                     (kotlin-mode . "kotlin-mode_icon")

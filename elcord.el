@@ -419,7 +419,7 @@ If no text is available, use the value of `mode-name'."
                 mode nil)
         (setq mode (get mode 'derived-mode-parent))))
     (unless (stringp ret)
-      (setq ret (format "%s" ret)))
+      (setq ret (format-mode-line ret)))
     ret))
 
 (defun elcord--mode-icon-and-text ()

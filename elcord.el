@@ -132,6 +132,12 @@ The mode text is the same found by `elcord-mode-text-alist'"
   :type 'boolean
   :group 'elcord)
 
+(defcustom elcord-buffer-details-format-function 'elcord-buffer-details-format
+  "Function to return the buffer details string shown on discord.
+Swap this with your own function if you want a custom buffer-details message."
+  :type 'function
+  :group 'elcord)
+
 (defcustom elcord-use-major-mode-as-main-icon 'nil
   "When enabled, the major mode determines the main icon, rather than it being the editor."
   :type 'boolean
@@ -460,11 +466,15 @@ If no text is available, use the value of `mode-name'."
        (cons "large_image" large-image)
        (cons "small_text" small-text))))))
 
+(defun elcord-buffer-details-format ()
+  "Return the buffer details string shown on discord."
+  (format "Editing %s" (buffer-name)))
+
 (defun elcord--details-and-state ()
   "Obtain the details and state to use for Discord's Rich Presence."
   (let ((activity (if elcord-display-buffer-details
                       (list
-                       (cons "details" (format "Editing %s" (buffer-name)))
+                       (cons "details" (funcall elcord-buffer-details-format-function))
                        (cons "state" (format "Line %s (%s of %S)"
                                              (format-mode-line "%l")
                                              (format-mode-line "%l")

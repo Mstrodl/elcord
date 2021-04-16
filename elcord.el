@@ -64,6 +64,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (erc-mode . "irc-mode_icon")
                                     (forth-mode . "forth-mode_icon")
                                     (fsharp-mode . "fsharp-mode_icon")
+                                    (gdscript-mode . "gdscript-mode_icon")
                                     (haskell-mode . "haskell-mode_icon")
                                     (haskell-interactive-mode . "haskell-mode_icon")
                                     (java-mode . "java-mode_icon")
@@ -99,6 +100,7 @@ Note, these icon names must be available as 'small_image' in Discord."
                                     (cperl-mode . "Perl")
                                     (enh-ruby-mode . "Ruby")
                                     (fsharp-mode . "F#")
+                                    (gdscript-mode . "GDScript")
                                     (java-mode . "Java")
                                     (lisp-mode . "Common-Lisp")
                                     (markdown-mode . "Markdown")
@@ -133,6 +135,12 @@ Otherwise, it will display:
 
 The mode text is the same found by `elcord-mode-text-alist'"
   :type 'boolean
+  :group 'elcord)
+
+(defcustom elcord-buffer-details-format-function 'elcord-buffer-details-format
+  "Function to return the buffer details string shown on discord.
+Swap this with your own function if you want a custom buffer-details message."
+  :type 'function
   :group 'elcord)
 
 (defcustom elcord-use-major-mode-as-main-icon 'nil
@@ -465,11 +473,15 @@ If no text is available, use the value of `mode-name'."
        (cons "large_image" large-image)
        (cons "small_text" small-text))))))
 
+(defun elcord-buffer-details-format ()
+  "Return the buffer details string shown on discord."
+  (format "Editing %s" (buffer-name)))
+
 (defun elcord--details-and-state ()
   "Obtain the details and state to use for Discord's Rich Presence."
   (let ((activity (if elcord-display-buffer-details
                       (list
-                       (cons "details" (format "Editing %s" (buffer-name)))
+                       (cons "details" (funcall elcord-buffer-details-format-function))
                        (cons "state" (format "Line %s (%s of %S)"
                                              (format-mode-line "%l")
                                              (format-mode-line "%l")

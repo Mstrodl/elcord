@@ -48,6 +48,11 @@ See <https://discordapp.com/developers/applications/me>."
   :type 'integer
   :group 'elcord)
 
+(defcustom elcord-quiet 'nil
+  "Whether or not to supress elcord messages (connecting, disconnecting, etc.)"
+  :type 'boolean
+  :group 'elcord)
+
 (defcustom elcord-mode-icon-alist '((c-mode . "c-mode_icon")
                                     (c++-mode . "cpp-mode_icon")
                                     (clojure-mode . "clojure-mode_icon")
@@ -300,7 +305,8 @@ Argument EVNT The available output from the process."
   "Connects to the Discord socket."
   (or elcord--sock
       (ignore-errors
-        (message "elcord: attempting reconnect..")
+        (unless elcord-quiet
+          (message "elcord: attempting reconnect.."))
         (setq elcord--sock (elcord--make-process))
         (condition-case nil
             (elcord--send-packet 0 `(("v" . 1) ("client_id" . ,(elcord--resolve-client-id))))
@@ -320,7 +326,7 @@ Argument EVNT The available output from the process."
   (when (elcord--connect)
     ;;Reconnected.
     ;; Put a pending message unless we already got first handshake
-    (unless elcord--update-presence-timer
+    (unless (or elcord--update-presence-timer elcord-quiet)
       (message "elcord: connecting..."))
     (elcord--cancel-reconnect)))
 
@@ -337,7 +343,8 @@ Argument EVNT The available output from the process."
 
 (defun elcord--handle-disconnect ()
   "Handles reconnecting when socket disconnects."
-  (message "elcord: disconnected")
+  (unless elcord-quiet
+    (message "elcord: disconnected"))
   ;;Stop updating presence for now
   (elcord--cancel-updates)
   (setq elcord--sock nil)
@@ -542,7 +549,8 @@ If there is no 'previous' buffer attempt to find a non-boring buffer to initiali
 (defun elcord--start-updates ()
   "Start sending periodic update to Discord Rich Presence."
   (unless elcord--update-presence-timer
-    (message "elcord: connected. starting updates")
+    (unless elcord-quiet
+      (message "elcord: connected. starting updates"))
     ;;Start sending updates now that we've heard from discord
     (setq elcord--last-known-position -1
           elcord--last-known-buffer-name ""

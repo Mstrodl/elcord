@@ -84,6 +84,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (zig-mode . "zig-mode_icon")
                                     ("^slime-.*" . "lisp-mode_icon")
                                     ("^sly-.*$" . "lisp-mode_icon")
+                                    (typescript-mode . "typescript-mode_icon")
                                     (php-mode . "php-mode_icon")
                                     (python-mode . "python-mode_icon"))
   "Mapping alist of major modes to icon names to have elcord use.
@@ -108,6 +109,7 @@ Note, these icon names must be available as 'small_image' in Discord."
                                     ("mhtml-mode" . "HTML")
                                     (slime-repl-mode . "SLIME-REPL")
                                     (sly-mrepl-mode . "Sly-REPL")
+                                    (typescript-mode . "Typescript")
                                     (php-mode "PHP"))
   "Mapping alist of major modes to text labels to have elcord use."
   :type '(alist :key-type (choice (symbol :tag "Mode name")

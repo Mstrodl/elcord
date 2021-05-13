@@ -103,7 +103,7 @@ Note, these icon names must be available as 'small_image' in Discord."
                                     (fsharp-mode . "F#")
                                     (gdscript-mode . "GDScript")
                                     (java-mode . "Java")
-                                    (lisp-mode . "Common-Lisp")
+                                    (lisp-mode . "Common Lisp")
                                     (markdown-mode . "Markdown")
                                     (magit-mode . "It's Magit!")
                                     ("mhtml-mode" . "HTML")

@@ -59,7 +59,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (csharp-mode . "csharp-mode_icon")
                                     (comint-mode . "comint-mode_icon")
                                     (cperl-mode . "cperl-mode_icon")
-                                    (emacs-lisp-mode . "emacs_icon")
+                                    (emacs-lisp-mode . (elcord--editor-icon))
                                     (enh-ruby-mode . "ruby-mode_icon")
                                     (erc-mode . "irc-mode_icon")
                                     (forth-mode . "forth-mode_icon")
@@ -155,6 +155,14 @@ Swap this with your own function if you want a custom buffer-details message."
   :type 'boolean
   :group 'elcord)
 
+(defcustom elcord-editor-icon 'nil
+  "Icon to use for the text editor. When nil, use the editor's native icon."
+  :type '(choice (const :tag "Editor Default" nil)
+                 (const :tag "Emacs" "emacs_icon")
+                 (const :tag "Spacemacs" "spacemacs_icon")
+                 (const :tag "Doom" "doom_icon"))
+  :group 'elcord)
+
 (defcustom elcord-boring-buffers-regexp-list '("^ "
                                                "\\\\*Messages\\\\*")
   "A list of regexp's to match boring buffers.
@@ -183,13 +191,6 @@ When visiting a boring buffer, it will not show in the elcord presence."
    ((boundp 'doom-version) "DOOM Emacs")
    (t "Emacs"))
   "The name to use to represent the current editor.")
-
-(defvar elcord--editor-icon
-  (cond
-   ((boundp 'spacemacs-version) "spacemacs_icon")
-   ((boundp 'doom-version) "doom_icon")
-   (t "emacs_icon"))
-  "The icon to use to represent the current editor.")
 
 (defvar elcord--discord-ipc-pipe "discord-ipc-0"
   "The name of the discord IPC pipe.")
@@ -411,13 +412,21 @@ otherwise if it is a function, call it with `mode' and return that value."
             cell (if result nil (cdr cell))))
     result))
 
+(defun elcord--editor-icon ()
+  "The icon to use to represent the current editor."
+  (cond
+   ((progn elcord-editor-icon) elcord-editor-icon)
+   ((boundp 'spacemacs-version) "spacemacs_icon")
+   ((boundp 'doom-version) "doom_icon")
+   (t "emacs_icon")))
+
 (defun elcord--mode-icon ()
   "Figure out what icon to use for the current major mode.
 If an icon is mapped by `elcord-mode-icon-alist', then that is used.
 Otherwise, if the mode is a derived mode, try to find an icon for it.
 If no icon is available, use the default icon."
   (let ((mode major-mode)
-        (ret elcord--editor-icon))
+        (ret (elcord--editor-icon)))
     (while mode
       (if-let ((icon (elcord--find-mode-entry elcord-mode-icon-alist mode)))
           (setq ret icon
@@ -456,10 +465,10 @@ If no text is available, use the value of `mode-name'."
       (setq large-text text
             large-image icon
             small-text elcord--editor-name
-            small-image elcord--editor-icon))
+            small-image (elcord--editor-icon)))
      (t
       (setq large-text elcord--editor-name
-            large-image elcord--editor-icon
+            large-image (elcord--editor-icon)
             small-text text
             small-image icon)))
     (cond

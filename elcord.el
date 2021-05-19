@@ -159,6 +159,9 @@ Swap this with your own function if you want a custom buffer-details message."
   "Icon to use for the text editor. When nil, use the editor's native icon."
   :type '(choice (const :tag "Editor Default" nil)
                  (const :tag "Emacs" "emacs_icon")
+                 (const :tag "Emacs (Pen)" "emacs_pen_icon")
+                 (const :tag "Emacs (Material)" "emacs_material_icon")
+                 (const :tag "Emacs (Legacy)" "emacs_legacy_icon")
                  (const :tag "Spacemacs" "spacemacs_icon")
                  (const :tag "Doom" "doom_icon"))
   :group 'elcord)

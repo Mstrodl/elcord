@@ -200,7 +200,7 @@ nil when elcord is not active.")
   "Timer used by elcord to attempt connection periodically, when active but disconnected.")
 
 (defvar elcord--sock nil
-  "The process used to communicate with Discord IPC.")
+  "The process used to communicate with Discord IPC. On Windows, this is the path.")
 
 (defvar elcord--last-known-position (count-lines (point-min) (point))
   "Last known position (line number) recorded by elcord.")
@@ -208,29 +208,14 @@ nil when elcord is not active.")
 (defvar elcord--last-known-buffer-name (buffer-name)
   "Last known buffer recorded by elcord.")
 
-(defvar elcord--stdpipe-path (expand-file-name
-                              "stdpipe.ps1"
-                              (file-name-directory (file-truename load-file-name)))
-  "Path to the 'stdpipe' script.
-On Windows, this script is used as a proxy for the Discord named pipe.
-Unused on other platforms.")
-
 (defun elcord--make-process ()
   "Make the asynchronous process that communicates with Discord IPC."
   (let ((default-directory "~/"))
     (cl-case system-type
       (windows-nt
-       (make-process
-        :name "*elcord-sock*"
-        :command (list
-                  "PowerShell"
-                  "-NoProfile"
-                  "-ExecutionPolicy" "Bypass"
-                  "-Command" elcord--stdpipe-path "." elcord--discord-ipc-pipe)
-        :connection-type 'pipe
-        :sentinel 'elcord--connection-sentinel
-        :filter 'elcord--connection-filter
-        :noquery t))
+       (expand-file-name
+        elcord--discord-ipc-pipe
+        (file-name-as-directory "\\\\?\\pipe\\")))
       (t
        (make-network-process
         :name "*elcord-sock*"
@@ -251,11 +236,6 @@ Unused on other platforms.")
   (setq elcord--startup-time (string-to-number (format-time-string "%s" (current-time))))
   (unless (elcord--resolve-client-id)
     (warn "elcord: no elcord-client-id available"))
-  (when (eq system-type 'windows-nt)
-    (unless (executable-find "powershell")
-      (warn "elcord: powershell not available"))
-    (unless (file-exists-p elcord--stdpipe-path)
-      (warn "elcord: 'stdpipe' script does not exist (%s)" elcord--stdpipe-path)))
 
   ;;Start trying to connect
   (elcord--start-reconnect))
@@ -318,15 +298,14 @@ Argument EVNT The available output from the process."
         (setq elcord--sock (elcord--make-process))
         (condition-case nil
             (elcord--send-packet 0 `(("v" . 1) ("client_id" . ,(elcord--resolve-client-id))))
-          (error
-           (delete-process elcord--sock)
-           (setq elcord--sock nil)))
+          (error (elcord--disconnect)))
         elcord--sock)))
 
 (defun elcord--disconnect ()
   "Disconnect elcord."
   (when elcord--sock
-    (delete-process elcord--sock)
+    (unless (eq system-type 'windows-nt)
+      (delete-process elcord--sock))
     (setq elcord--sock nil)))
 
 (defun elcord--reconnect ()
@@ -376,7 +355,10 @@ Argument OBJ The data to send to the IPC server."
            `((:op . ,opcode)
              (:len . ,datalen)
              (:data . ,jsonstr)))))
-    (process-send-string elcord--sock packet)))
+    ;; Windows uses a file...
+    (if (eq system-type 'windows-nt)
+        (write-region packet nil elcord--sock 'append)
+        (process-send-string elcord--sock packet))))
 
 (defun elcord--test-match-p (test mode)
   "Test `MODE' against `TEST'.
@@ -481,6 +463,8 @@ If no text is available, use the value of `mode-name'."
   "Obtain the details and state to use for Discord's Rich Presence."
   (let ((activity (if elcord-display-buffer-details
                       (list
+                       ;; (cons "buttons" (list (list (cons "label" "test")
+                       ;;                             (cons "url" "jAvascript:alert(1)"))))
                        (cons "details" (funcall elcord-buffer-details-format-function))
                        (cons "state" (format "Line %s (%s of %S)"
                                              (format-mode-line "%l")

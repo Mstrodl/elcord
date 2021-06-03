@@ -213,9 +213,10 @@ nil when elcord is not active.")
   (let ((default-directory "~/"))
     (cl-case system-type
       (windows-nt
-       (expand-file-name
-        elcord--discord-ipc-pipe
-        (file-name-as-directory "\\\\?\\pipe\\")))
+       (find-file
+        (expand-file-name
+         elcord--discord-ipc-pipe
+         (file-name-as-directory "\\\\?\\pipe\\"))))
       (t
        (make-network-process
         :name "*elcord-sock*"
@@ -304,7 +305,8 @@ Argument EVNT The available output from the process."
 (defun elcord--disconnect ()
   "Disconnect elcord."
   (when elcord--sock
-    (unless (eq system-type 'windows-nt)
+    (if (eq system-type 'windows-nt)
+      (kill-buffer elcord--sock)
       (delete-process elcord--sock))
     (setq elcord--sock nil)))
 
@@ -357,7 +359,10 @@ Argument OBJ The data to send to the IPC server."
              (:data . ,jsonstr)))))
     ;; Windows uses a file...
     (if (eq system-type 'windows-nt)
-        (write-region packet nil elcord--sock 'append)
+        (with-current-buffer elcord--sock
+          (erase-buffer)
+          (insert packet)
+          (save-buffer))
         (process-send-string elcord--sock packet))))
 
 (defun elcord--test-match-p (test mode)

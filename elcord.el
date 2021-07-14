@@ -53,7 +53,7 @@ See <https://discordapp.com/developers/applications/me>."
   :type 'integer
   :group 'elcord)
 
-(defcustom elcord-idle-message "Idowu"
+(defcustom elcord-idle-message "Getting something to drink..."
   "Message to show when elcord status is idle."
   :type 'string)
 
@@ -627,14 +627,14 @@ If there is no 'previous' buffer attempt to find a non-boring buffer to initiali
 
 (defun elcord--cancel-idle ()
   "Resume presence update and timer."
-  (unless elcord-quiet
-      (message "elcord: welcome back"))
   (remove-hook 'pre-command-hook 'elcord--cancel-idle)
   ;;hacky way to resume updates
   (setq elcord--update-presence-timer nil)
   (elcord--start-updates)
   ;;resume timer with elapsed time
-  (setq elcord--startup-time (string-to-number (format-time-string "%s" (time-subtract nil elcord--startup-time)))))
+  (setq elcord--startup-time (string-to-number (format-time-string "%s" (time-subtract nil elcord--startup-time))))
+  (unless elcord-quiet
+      (message "elcord: welcome back")))
 
 (provide 'elcord)
 ;;; elcord.el ends here

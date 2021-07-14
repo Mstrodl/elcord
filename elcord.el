@@ -231,6 +231,9 @@ nil when elcord is not active.")
 On Windows, this script is used as a proxy for the Discord named pipe.
 Unused on other platforms.")
 
+(defvar elcord--idle-status nil
+  "Current idle status.")
+
 (defun elcord--make-process ()
   "Make the asynchronous process that communicates with Discord IPC."
   (let ((default-directory "~/"))
@@ -606,38 +609,44 @@ If there is no 'previous' buffer attempt to find a non-boring buffer to initiali
 
 (defun elcord--start-idle ()
   "Set presence to idle, pause update and timer."
-  (unless elcord-quiet
+  (unless elcord--idle-status
+    (unless elcord-quiet
       (message (format "elcord: %s" elcord-idle-message )))
 
-  ;;hacky way to stop updates and store elapsed time
-  (cancel-timer elcord--update-presence-timer)
-  (setq elcord--startup-time (string-to-number (format-time-string "%s" (time-subtract nil elcord--startup-time))))
+    ;;hacky way to stop updates and store elapsed time
+    (cancel-timer elcord--update-presence-timer)
+    (setq elcord--startup-time (string-to-number (format-time-string "%s" (time-subtract nil elcord--startup-time)))
 
-  (let* ((activity
-          `(("assets" . (,@(elcord--mode-icon-and-text)))
-            ("timestamps" ("start" ,@(string-to-number (format-time-string "%s" (current-time)))))
-            ("details" . "Idle") ("state" .  ,elcord-idle-message)))
-         (nonce (format-time-string "%s%N"))
-         (presence
-          `(("cmd" . "SET_ACTIVITY")
-            ("args" . (("activity" . ,activity)
-                       ("pid" . ,(emacs-pid))))
-            ("nonce" . ,nonce))))
-    (elcord--send-packet 1 presence))
-  (add-hook 'pre-command-hook 'elcord--cancel-idle))
+          elcord--idle-status t)
+
+    (let* ((activity
+            `(("assets" . (,@(elcord--mode-icon-and-text)))
+              ("timestamps" ("start" ,@(string-to-number (format-time-string "%s" (current-time)))))
+              ("details" . "Idle") ("state" .  ,elcord-idle-message)))
+           (nonce (format-time-string "%s%N"))
+           (presence
+            `(("cmd" . "SET_ACTIVITY")
+              ("args" . (("activity" . ,activity)
+                         ("pid" . ,(emacs-pid))))
+              ("nonce" . ,nonce))))
+      (elcord--send-packet 1 presence))
+    (add-hook 'pre-command-hook 'elcord--cancel-idle)))
 
 (defun elcord--cancel-idle ()
   "Resume presence update and timer."
-  (remove-hook 'pre-command-hook 'elcord--cancel-idle)
+  (when elcord--idle-status
+    (remove-hook 'pre-command-hook 'elcord--cancel-idle)
 
-  ;;hacky way to resume updates
-  (setq elcord--update-presence-timer nil)
-  (elcord--start-updates)
+    ;;resume timer with elapsed time
+    (setq elcord--startup-time (string-to-number (format-time-string "%s" (time-subtract nil elcord--startup-time)))
+          elcord--idle-status nil
+          ;;hacky way to resume updates
+          elcord--update-presence-timer nil)
+    (elcord--start-updates)
 
-  ;;resume timer with elapsed time
-  (setq elcord--startup-time (string-to-number (format-time-string "%s" (time-subtract nil elcord--startup-time))))
-  (unless elcord-quiet
-      (message "elcord: welcome back")))
+    (unless elcord-quiet
+      (message "elcord: welcome back"))))
+
 
 (provide 'elcord)
 ;;; elcord.el ends here

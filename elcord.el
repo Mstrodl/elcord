@@ -55,7 +55,7 @@ See <https://discordapp.com/developers/applications/me>."
 
 (defcustom elcord-idle-message "Idowu"
   "Message to show when elcord status is idle."
-  :type 'string
+  :type 'string)
 
 (defcustom elcord-quiet 'nil
   "Whether or not to supress elcord messages (connecting, disconnecting, etc.)"
@@ -605,8 +605,12 @@ If there is no 'previous' buffer attempt to find a non-boring buffer to initiali
     (setq elcord--update-presence-timer nil)))
 
 (defun elcord--start-idle ()
-  "Set presence to idle with it's own timer."
+  "Set present to idle, pause update and timer."
+  (message "elcord: going idle")
+  ;;hacky way to stop uptades
   (cancel-timer elcord--update-presence-timer)
+  ;;store elapsed time
+  (setq elcord--startup-time (string-to-number (format-time-string "%s" (time-subtract nil elcord--startup-time))))
   (let* ((activity
           `(("assets" . (,@(elcord--mode-icon-and-text)))
             ("timestamps" ("start" ,@(string-to-number (format-time-string "%s" (current-time)))))
@@ -618,21 +622,17 @@ If there is no 'previous' buffer attempt to find a non-boring buffer to initiali
                        ("pid" . ,(emacs-pid))))
             ("nonce" . ,nonce))))
     (elcord--send-packet 1 presence))
-  (message "elcord: going idle")
   (add-hook 'pre-command-hook 'elcord--cancel-idle))
 
 (defun elcord--cancel-idle ()
-  "Resume presence timer when user is active again."
+  "Resume presence update and timer."
+  (message "elcord: welcome back")
   (remove-hook 'pre-command-hook 'elcord--cancel-idle)
+  ;;hacky way to resume uptades
   (setq elcord--update-presence-timer nil)
   (elcord--start-updates)
-  ;;resume previous timer
-  (let* ((elapsed
-          (time-subtract (current-time) elcord--startup-time))
-         (adjusted
-          (time-add elcord--startup-time elapsed)))
-    (setq elcord--startup-time (string-to-number (format-time-string "%s" adjusted))))
-  (message "elcord: welcome back"))
+  ;;resume timer with elapsed time
+  (setq elcord--startup-time (string-to-number (format-time-string "%s" (time-subtract nil elcord--startup-time)))))
 
 (provide 'elcord)
 ;;; elcord.el ends here

@@ -606,8 +606,9 @@ If there is no 'previous' buffer attempt to find a non-boring buffer to initiali
 
 (defun elcord--start-idle ()
   "Set present to idle, pause update and timer."
-  (message "elcord: going idle")
-  ;;hacky way to stop uptades
+  (unless elcord-quiet
+      (message (format "elcord: %s" elcord-idle-message )))
+  ;;hacky way to stop updates
   (cancel-timer elcord--update-presence-timer)
   ;;store elapsed time
   (setq elcord--startup-time (string-to-number (format-time-string "%s" (time-subtract nil elcord--startup-time))))
@@ -626,9 +627,10 @@ If there is no 'previous' buffer attempt to find a non-boring buffer to initiali
 
 (defun elcord--cancel-idle ()
   "Resume presence update and timer."
-  (message "elcord: welcome back")
+  (unless elcord-quiet
+      (message "elcord: welcome back"))
   (remove-hook 'pre-command-hook 'elcord--cancel-idle)
-  ;;hacky way to resume uptades
+  ;;hacky way to resume updates
   (setq elcord--update-presence-timer nil)
   (elcord--start-updates)
   ;;resume timer with elapsed time

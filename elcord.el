@@ -49,8 +49,13 @@ See <https://discordapp.com/developers/applications/me>."
   :group 'elcord)
 
 (defcustom elcord-idle-timer nil
-  "How long to wait before elcord goes idle"
+  "How long to wait before setting the status to idle."
   :type 'integer
+  :group 'elcord)
+
+(defcustom elcord-idle-message "Idowu"
+  "Message to show when elcord status is idle."
+  :type 'string
   :group 'elcord)
 
 (defcustom elcord-mode-icon-alist '((c-mode . "c-mode_icon")
@@ -246,9 +251,9 @@ Unused on other platforms.")
       (warn "elcord: powershell not available"))
     (unless (file-exists-p elcord--stdpipe-path)
       (warn "elcord: 'stdpipe' script does not exist (%s)" elcord--stdpipe-path)))
-  (if elcord-idle-timer
-      (run-with-idle-timer
-       elcord-idle-timer t 'elcord--idle-handler))
+  (when elcord-idle-timer
+    (run-with-idle-timer
+     elcord-idle-timer t 'elcord--start-idle))
 
   ;;Start trying to connect
   (elcord--start-reconnect))
@@ -264,6 +269,9 @@ Unused on other platforms.")
   (when elcord--sock
     ;;Empty our presence
     (elcord--empty-presence))
+
+  ;;Stop running idle hook
+  (cancel-function-timers 'elcord--start-idle)
 
   (elcord--disconnect))
 
@@ -562,13 +570,13 @@ If there is no 'previous' buffer attempt to find a non-boring buffer to initiali
     (cancel-timer elcord--update-presence-timer)
     (setq elcord--update-presence-timer nil)))
 
-(defun elcord--idle-handler ()
-  ;;pause time
-  (setq elcord--startup-time (time-subtract (current-time) elcord--startup-time))
+(defun elcord--start-idle ()
+  "Set presence to idle with it's own timer."
+  (cancel-timer elcord--update-presence-timer)
   (let* ((activity
           `(("assets" . (,@(elcord--mode-icon-and-text)))
             ("timestamps" ("start" ,@(string-to-number (format-time-string "%s" (current-time)))))
-            ("details" . "Idle") ("state" .  "Idle text")))
+            ("details" . "Idle") ("state" .  ,elcord-idle-message)))
          (nonce (format-time-string "%s%N"))
          (presence
           `(("cmd" . "SET_ACTIVITY")
@@ -576,14 +584,21 @@ If there is no 'previous' buffer attempt to find a non-boring buffer to initiali
                        ("pid" . ,(emacs-pid))))
             ("nonce" . ,nonce))))
     (elcord--send-packet 1 presence))
+  (message "elcord: going idle")
+  (add-hook 'pre-command-hook 'elcord--cancel-idle))
 
-  (add-hook 'pre-command-hook 'elcord--idle-handler-function))
-
-(defun elcord--idle-handler-function ()
-  (remove-hook 'pre-command-hook 'elcord--idle-handler-function)
-  ;;resume timer
-  (setq elcord--startup-time (string-to-number (format-time-string "%s" (time-subtract (current-time) elcord--startup-time)))))
-
+(defun elcord--cancel-idle ()
+  "Resume presence timer when user is active again."
+  (remove-hook 'pre-command-hook 'elcord--cancel-idle)
+  (setq elcord--update-presence-timer nil)
+  (elcord--start-updates)
+  ;;resume previous timer
+  (let* ((elapsed
+          (time-subtract (current-time) elcord--startup-time))
+         (adjusted
+          (time-add elcord--startup-time elapsed)))
+    (setq elcord--startup-time (string-to-number (format-time-string "%s" adjusted))))
+  (message "elcord: welcome back"))
 
 (provide 'elcord)
 ;;; elcord.el ends here

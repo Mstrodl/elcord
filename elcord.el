@@ -48,7 +48,7 @@ See <https://discordapp.com/developers/applications/me>."
   :type 'integer
   :group 'elcord)
 
-(defcustom elcord-idle-timer nil
+(defcustom elcord-idle-timer 300
   "How long to wait before setting the status to idle."
   :type 'integer
   :group 'elcord)

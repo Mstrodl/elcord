@@ -605,13 +605,14 @@ If there is no 'previous' buffer attempt to find a non-boring buffer to initiali
     (setq elcord--update-presence-timer nil)))
 
 (defun elcord--start-idle ()
-  "Set present to idle, pause update and timer."
+  "Set presence to idle, pause update and timer."
   (unless elcord-quiet
       (message (format "elcord: %s" elcord-idle-message )))
-  ;;hacky way to stop updates
+
+  ;;hacky way to stop updates and store elapsed time
   (cancel-timer elcord--update-presence-timer)
-  ;;store elapsed time
   (setq elcord--startup-time (string-to-number (format-time-string "%s" (time-subtract nil elcord--startup-time))))
+
   (let* ((activity
           `(("assets" . (,@(elcord--mode-icon-and-text)))
             ("timestamps" ("start" ,@(string-to-number (format-time-string "%s" (current-time)))))
@@ -628,9 +629,11 @@ If there is no 'previous' buffer attempt to find a non-boring buffer to initiali
 (defun elcord--cancel-idle ()
   "Resume presence update and timer."
   (remove-hook 'pre-command-hook 'elcord--cancel-idle)
+
   ;;hacky way to resume updates
   (setq elcord--update-presence-timer nil)
   (elcord--start-updates)
+
   ;;resume timer with elapsed time
   (setq elcord--startup-time (string-to-number (format-time-string "%s" (time-subtract nil elcord--startup-time))))
   (unless elcord-quiet

@@ -93,6 +93,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (zig-mode . "zig-mode_icon")
                                     ("^slime-.*" . "lisp-mode_icon")
                                     ("^sly-.*$" . "lisp-mode_icon")
+                                    (terraform-mode . "terraform-mode_icon")
                                     (typescript-mode . "typescript-mode_icon")
                                     (php-mode . "php-mode_icon")
                                     (python-mode . "python-mode_icon"))
@@ -126,6 +127,7 @@ Note, these icon names must be available as 'small_image' in Discord."
                                     (puml-mode . "UML")
                                     (slime-repl-mode . "SLIME-REPL")
                                     (sly-mrepl-mode . "Sly-REPL")
+                                    (terraform-mode . "Terraform")
                                     (typescript-mode . "Typescript")
                                     (php-mode "PHP"))
   "Mapping alist of major modes to text labels to have elcord use."

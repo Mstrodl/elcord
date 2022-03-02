@@ -94,7 +94,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (rust-mode . "rust-mode_icon")
                                     (rustic-mode . "rust-mode_icon")
                                     (solidity-mode . "solidity-mode_icon")
-                                    (sh-mode . "sh-mode_icon")
+                                    (sh-mode . "comint-mode_icon")
                                     (terraform-mode . "terraform-mode_icon")
                                     (typescript-mode . "typescript-mode_icon")
                                     (zig-mode . "zig-mode_icon")

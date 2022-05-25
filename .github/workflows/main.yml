@@ -1,0 +1,28 @@
+name: main
+on:
+  push:
+    branches:
+      - master
+      - feature/gh-actions
+    tags:
+      - '*'
+  pull_request: {}
+  workflow_dispatch:
+
+jobs:
+  publish_icons:
+    name: Publish icons
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run : |
+          sudo apt update
+          sudo apt install -y jq curl
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          path: "."
+      - name: Update icons
+        run : |
+          cd icons
+          DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }} ./update.sh

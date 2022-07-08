@@ -520,8 +520,7 @@ If no text is available, use the value of `mode-name'."
   (let ((activity (if elcord-display-buffer-details
                       (list
                        (cons "details" (funcall elcord-buffer-details-format-function))
-                       (cons "state" (format "Line %s (%s of %S)"
-                                             (format-mode-line "%l")
+                       (cons "state" (format "Line %s of %S"
                                              (format-mode-line "%l")
                                              (+ 1 (count-lines (point-min) (point-max))))))
                     (list

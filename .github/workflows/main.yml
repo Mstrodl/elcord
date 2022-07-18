@@ -13,6 +13,7 @@ jobs:
   publish_icons:
     name: Publish icons
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'Mstrodl'
     steps:
       - name: Install dependencies
         run : |

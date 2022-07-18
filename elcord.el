@@ -53,7 +53,8 @@ See <https://discordapp.com/developers/applications/me>."
   :type 'boolean
   :group 'elcord)
 
-(defcustom elcord-mode-icon-alist '((assembly-mode . "assembly-mode_icon")
+(defcustom elcord-mode-icon-alist '((agda-mode . "agda-mode_icon")
+                                    (assembly-mode . "assembly-mode_icon")
                                     (c-mode . "c-mode_icon")
                                     (c++-mode . "cpp-mode_icon")
                                     (clojure-mode . "clojure-mode_icon")
@@ -108,7 +109,8 @@ Note, these icon names must be available as 'small_image' in Discord."
                                     (function :tag "Mapping function")))
   :group 'elcord)
 
-(defcustom elcord-mode-text-alist '((assembly-mode . "Assembly")
+(defcustom elcord-mode-text-alist '((agda-mode . "Agda")
+                                    (assembly-mode . "Assembly")
                                     (c-mode . "C  ")
                                     (c++-mode . "C++")
                                     (csharp-mode . "C#")

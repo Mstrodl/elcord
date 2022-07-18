@@ -43,6 +43,15 @@ See <https://discordapp.com/developers/applications/me>."
                  (function :tag "Call the function with no args to get the ID."))
   :group 'elcord)
 
+(defcustom elcord-icon-base
+  '"https://raw.githubusercontent.com/Mstrodl/elcord/master/icons/"
+  "Base URL for icon images. Mode icons will be loaded from this URL + the icon name + '.png'"
+  :type '(choice (const :tag "Elcord GitHub Repository"
+                        "https://raw.githubusercontent.com/Mstrodl/elcord/master/icons/")
+                 (string :tag "Use the specified URL base")
+                 (function :tag "Call the function with icon name as an arg to get the URL base."))
+  :group 'elcord)
+
 (defcustom elcord-refresh-rate 15
   "How often to send updates to Discord, in seconds."
   :type 'integer
@@ -346,6 +355,17 @@ Unused on other platforms.")
     (function
      (funcall elcord-client-id))))
 
+(defun elcord--resolve-icon-base (icon)
+  "Evaluate `elcord-icon-base' and return the URL to use.
+Argument ICON the name of the icon we're resolving."
+  (cl-typecase elcord-icon-base
+    (null
+     nil)
+    (string
+     (concat elcord-icon-base icon ".png"))
+    (function
+     (funcall elcord-icon-base icon))))
+
 (defun elcord--connection-sentinel (process evnt)
   "Track connection state change on Discord connection.
 Argument PROCESS The process this sentinel is attached to.
@@ -404,7 +424,7 @@ Argument EVNT The available output from the process."
 (defun elcord--handle-disconnect ()
   "Handles reconnecting when socket disconnects."
   (unless elcord-quiet
-    (message "elcord: disconnected"))
+    (message "elcord: disconnected by remote host"))
   ;;Stop updating presence for now
   (elcord--cancel-updates)
   (setq elcord--sock nil)
@@ -478,7 +498,7 @@ If no icon is available, use the default icon."
         (ret (elcord--editor-icon)))
     (while mode
       (if-let ((icon (elcord--find-mode-entry elcord-mode-icon-alist mode)))
-          (setq ret icon
+          (setq ret (elcord--resolve-icon-base icon)
                 mode nil)
         (setq mode (get mode 'derived-mode-parent))))
     ret))
@@ -592,10 +612,11 @@ If no text is available, use the value of `mode-name'."
   "Try updating presence with `NEW-BUFFER-NAME' and `NEW-BUFFER-POSITION' while handling errors and disconnections."
   (setq elcord--last-known-buffer-name new-buffer-name
         elcord--last-known-position new-buffer-position)
-  (condition-case nil
+  (condition-case err
       ;;Try and set the presence
       (elcord--set-presence)
     (error
+     (message "elcord: error setting presence: %s" (error-message-string err))
      ;;If we hit an error, cancel updates
      (elcord--cancel-updates)
      ;; Disconnect

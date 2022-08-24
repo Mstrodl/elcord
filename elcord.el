@@ -79,6 +79,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (go-mode . "go-mode_icon")
                                     (latex-mode . "latex-mode_icon")
                                     (lisp-mode . "lisp-mode_icon")
+				    (emacs-lisp-mode . "elisp-mode_icon
                                     (magit-mode . "magit-mode_icon")
                                     (markdown-mode . "markdown-mode_icon")
                                     (meson-mode . "meson-mode_icon")
@@ -125,6 +126,7 @@ Note, these icon names must be available as 'small_image' in Discord."
                                     (java-mode . "Java")
                                     (julia-mode . "Julia")
                                     (lisp-mode . "Common Lisp")
+				    (emacs-lisp-mode . "Emacs Lisp")
                                     (markdown-mode . "Markdown")
                                     (magit-mode . "It's Magit!")
                                     ("mhtml-mode" . "HTML")

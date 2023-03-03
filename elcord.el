@@ -185,6 +185,12 @@ The mode text is the same found by `elcord-mode-text-alist'"
   :type 'boolean
   :group 'elcord)
 
+(defcustom elcord-display-line-numbers 't
+  "When enabled, shows the total line numbers of current buffer.
+Including the position of the cursor in the buffer."
+  :type 'boolean
+  :group 'elcord)
+
 (defcustom elcord-buffer-details-format-function 'elcord-buffer-details-format
   "Function to return the buffer details string shown on discord.
 Swap this with your own function if you want a custom buffer-details message."
@@ -560,11 +566,14 @@ If no text is available, use the value of `mode-name'."
 (defun elcord--details-and-state ()
   "Obtain the details and state to use for Discord's Rich Presence."
   (let ((activity (if elcord-display-buffer-details
-                      (list
-                       (cons "details" (funcall elcord-buffer-details-format-function))
-                       (cons "state" (format "Line %s of %S"
-                                             (format-mode-line "%l")
-                                             (+ 1 (count-lines (point-min) (point-max))))))
+                      (if elcord-display-line-numbers
+                          (list
+                           (cons "details" (funcall elcord-buffer-details-format-function))
+                           (cons "state" (format "Line %s of %S"
+                                                 (format-mode-line "%l")
+                                                 (+ 1 (count-lines (point-min) (point-max))))))
+                        (list
+                         (cons "details" (funcall elcord-buffer-details-format-function))))
                     (list
                      (cons "details" "Editing")
                      (cons "state" (elcord--mode-text))))))

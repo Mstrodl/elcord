@@ -80,6 +80,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (csharp-mode . "csharp-mode_icon")
                                     (comint-mode . "comint-mode_icon")
                                     (cperl-mode . "cperl-mode_icon")
+                                    (dockerfile-mode . "dockerfile-mode_icon")
                                     (elixir-mode . "elixir-mode_icon")
                                     (emacs-lisp-mode . (elcord--editor-icon))
                                     (enh-ruby-mode . "ruby-mode_icon")

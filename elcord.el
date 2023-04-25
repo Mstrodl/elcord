@@ -73,6 +73,7 @@ See <https://discordapp.com/developers/applications/me>."
 
 (defcustom elcord-mode-icon-alist '((agda-mode . "agda-mode_icon")
                                     (assembly-mode . "assembly-mode_icon")
+                                    (bqn-mode . "bqn-mode_icon")
                                     (c-mode . "c-mode_icon")
                                     (c++-mode . "cpp-mode_icon")
                                     (clojure-mode . "clojure-mode_icon")
@@ -130,6 +131,7 @@ Note, these icon names must be available as 'small_image' in Discord."
 
 (defcustom elcord-mode-text-alist '((agda-mode . "Agda")
                                     (assembly-mode . "Assembly")
+                                    (bqn-mode . "BQN")
                                     (c-mode . "C  ")
                                     (c++-mode . "C++")
                                     (csharp-mode . "C#")
@@ -667,7 +669,7 @@ If there is no 'previous' buffer attempt to find a non-boring buffer to initiali
   "Set presence to idle, pause update and timer."
   (unless elcord--idle-status
     (unless elcord-quiet
-      (message (format "elcord: %s" elcord-idle-message )))
+      (message (format "elcord: %s" elcord-idle-message)))
 
     ;;hacky way to stop updates and store elapsed time
     (cancel-timer elcord--update-presence-timer)

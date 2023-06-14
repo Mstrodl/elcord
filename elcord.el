@@ -454,7 +454,10 @@ Argument EVNT The available output from the process."
   "Packs and sends a packet to the IPC server.
 Argument OPCODE OP code to send.
 Argument OBJ The data to send to the IPC server."
-  (let* ((jsonstr (json-encode obj))
+  (let* ((jsonstr
+          (encode-coding-string
+           (json-encode obj)
+           'utf-8))
          (datalen (length jsonstr))
          (message-spec
           `((:op u32r)

@@ -61,3 +61,8 @@ For creating an 'Application':
 
 After you've created your application, Customize `elcord-client-id` to be the new application's client ID,
 and set the value of `elcord-mode-icon-alist` as appropriate to reference your new icons.
+
+## Projectile Integration
+
+elcord supports displaying which project you're currently working on by using [Projectile](https://github.com/bbatsov/projectile). Simply make sure that projectile is loaded before elcord, and enable the "Elcord Display Project Name" custimization via `M-x package-install RET elcord RET`, or `(setq elcord-display-project-name t)`.
+Please note that line numbers and the project name cannot be displayed at the same time. Displaying line numbers will take precedence if both have been enabled.

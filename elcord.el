@@ -201,7 +201,7 @@ The mode text is the same found by `elcord-mode-text-alist'"
   \"Working on <project-name>\"
 
 When both elcord-display-line-numbers and elcord-display-project-name are enabled, displaying line numbers takes
-presenence.
+precedence.
 
 Requires Projectile.")
 

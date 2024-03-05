@@ -504,11 +504,12 @@ otherwise if it is a function, call it with `mode' and return that value."
 
 (defun elcord--editor-icon ()
   "The icon to use to represent the current editor."
-  (cond
-   ((progn elcord-editor-icon) elcord-editor-icon)
-   ((boundp 'spacemacs-version) "spacemacs_icon")
-   ((boundp 'doom-version) "doom_icon")
-   (t "emacs_icon")))
+  (elcord--resolve-icon-base
+   (cond
+    ((progn elcord-editor-icon) elcord-editor-icon)
+    ((boundp 'spacemacs-version) "spacemacs_icon")
+    ((boundp 'doom-version) "doom_icon")
+    (t "emacs_icon"))))
 
 (defun elcord--mode-icon ()
   "Figure out what icon to use for the current major mode.

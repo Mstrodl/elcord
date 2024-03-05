@@ -195,6 +195,16 @@ The mode text is the same found by `elcord-mode-text-alist'"
   :type 'boolean
   :group 'elcord)
 
+(defcustom elcord-display-project-name 't
+  "When enabled, Discord status will display the project name the current buffer is part of:
+\"Editing <buffer-name>\"
+  \"Working on <project-name>\"
+
+When both elcord-display-line-numbers and elcord-display-project-name are enabled, displaying line numbers takes
+precedence.
+
+Requires Projectile.")
+
 (defcustom elcord-display-line-numbers 't
   "When enabled, shows the total line numbers of current buffer.
 Including the position of the cursor in the buffer."
@@ -204,6 +214,12 @@ Including the position of the cursor in the buffer."
 (defcustom elcord-buffer-details-format-function 'elcord-buffer-details-format
   "Function to return the buffer details string shown on discord.
 Swap this with your own function if you want a custom buffer-details message."
+  :type 'function
+  :group 'elcord)
+
+(defcustom elcord-project-name-format-function 'elcord-project-name-format
+  "Function to return the project name string shown on discord.
+Swap this with your own function if you want a custom project-name message."
   :type 'function
   :group 'elcord)
 
@@ -287,6 +303,9 @@ Unused on other platforms.")
 
 (defvar elcord--idle-status nil
   "Current idle status.")
+
+(defvar elcord--projectile-present (when (require 'projectile nil 'noerror) t)
+  "Whether projectile is present or not.")
 
 (defun elcord--make-process ()
   "Make the asynchronous process that communicates with Discord IPC."
@@ -579,20 +598,25 @@ If no text is available, use the value of `mode-name'."
   "Return the buffer details string shown on discord."
   (format "Editing %s" (buffer-name)))
 
+(defun elcord-project-name-format ()
+  "Return the project name as shown on discord."
+  (format "Working on %s" (projectile-project-name)))
+
 (defun elcord--details-and-state ()
   "Obtain the details and state to use for Discord's Rich Presence."
-  (let ((activity (if elcord-display-buffer-details
-                      (if elcord-display-line-numbers
-                          (list
-                           (cons "details" (funcall elcord-buffer-details-format-function))
-                           (cons "state" (format "Line %s of %S"
-                                                 (format-mode-line "%l")
-                                                 (+ 1 (count-lines (point-min) (point-max))))))
-                        (list
-                         (cons "details" (funcall elcord-buffer-details-format-function))))
-                    (list
-                     (cons "details" "Editing")
-                     (cons "state" (elcord--mode-text))))))
+  (let ((activity (list
+                   (if elcord-display-buffer-details
+                       (cons "details" (funcall elcord-buffer-details-format-function))
+                     (cons "details" "Editing")))))
+    
+    (if elcord-display-line-numbers
+        (push (cons "state" (format "Line %s of %S"
+                                    (format-mode-line "%l")
+                                    (+ 1 (count-lines (point-min) (point-max)))))
+              activity)
+      (when (and elcord-display-project-name elcord--projectile-present (not (string= (projectile-project-name) "-")))
+        (push (cons "state" (funcall elcord-project-name-format-function)) activity)))
+      
     (when elcord-display-elapsed
       (push (list "timestamps" (cons "start" elcord--startup-time)) activity))
     activity))

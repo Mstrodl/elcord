@@ -305,19 +305,19 @@ Unused on other platforms.")
         :filter 'elcord--connection-filter
         :noquery t))
       (t
-       (make-network-process
-        :name "*elcord-sock*"
-        :remote (expand-file-name
-                 elcord--discord-ipc-pipe
-                 (file-name-as-directory
-                  (or (getenv "XDG_RUNTIME_DIR")
-                      (getenv "TMPDIR")
-                      (getenv "TMP")
-                      (getenv "TEMP")
-                      "/tmp")))
-        :sentinel 'elcord--connection-sentinel
-        :filter 'elcord--connection-filter
-        :noquery t)))))
+       (apply #'make-network-process
+              `(:name "*elcord-sock*"
+                :remote ,(expand-file-name
+                          elcord--discord-ipc-pipe
+                          (file-name-as-directory
+                           (or (getenv "XDG_RUNTIME_DIR")
+                               (getenv "TMPDIR")
+                               (getenv "TMP")
+                               (getenv "TEMP")
+                               "/tmp")))
+                :sentinel elcord--connection-sentinel
+                :filter elcord--connection-filter
+                :noquery t))))))
 
 (defun elcord--enable ()
   "Called when variable ‘elcord-mode’ is enabled."

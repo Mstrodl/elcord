@@ -125,6 +125,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (terraform-mode . "terraform-mode_icon")
                                     (typescript-mode . "typescript-mode_icon")
                                     (zig-mode . "zig-mode_icon")
+                                    (janet-mode . "janet-mode_icon")
                                     ("^slime-.*" . "lisp-mode_icon")
                                     ("^sly-.*$" . "lisp-mode_icon"))
   "Mapping alist of major modes to icon names to have elcord use.

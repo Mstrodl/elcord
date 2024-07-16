@@ -301,7 +301,9 @@ Unused on other platforms.")
     ;; Otherwise, try to find the pipe in the usual places
     (expand-file-name elcord--discord-ipc-pipe
                       (file-name-as-directory
-                       (or (getenv "XDG_RUNTIME_DIR")
+                       (or (expand-file-name "app/com.discordapp.Discord"
+                                             (getenv "XDG_RUNTIME_DIR"))
+                           (getenv "XDG_RUNTIME_DIR")
                            (getenv "TMPDIR")
                            (getenv "TMP")
                            (getenv "TEMP")

@@ -264,7 +264,7 @@ When visiting a boring buffer, it will not show in the elcord presence."
    (t "Emacs"))
   "The name to use to represent the current editor.")
 
-(defvar elcord--discord-ipc-pipe "discord-ipc-0"
+(defvar elcord--discord-ipc-pipe-format "discord-ipc-%d"
   "The name of the discord IPC pipe.")
 
 (defvar elcord--update-presence-timer nil
@@ -299,15 +299,23 @@ Unused on other platforms.")
       ;; If the user has specified the pipe location, trust them
       elcord-discord-ipc-path
     ;; Otherwise, try to find the pipe in the usual places
-    (expand-file-name elcord--discord-ipc-pipe
-                      (file-name-as-directory
-                       (or (expand-file-name "app/com.discordapp.Discord"
-                                             (getenv "XDG_RUNTIME_DIR"))
-                           (getenv "XDG_RUNTIME_DIR")
-                           (getenv "TMPDIR")
-                           (getenv "TMP")
-                           (getenv "TEMP")
-                           "/tmp")))))
+    (let ((candidates
+           (mapcan
+            (lambda (dir)
+              (mapcar
+               (lambda (num)
+                 (expand-file-name (format elcord--discord-ipc-pipe-format num) dir))
+               (number-sequence 0 9)))
+            (list (expand-file-name "app/com.discordapp.Discord"
+                                    (getenv "XDG_RUNTIME_DIR"))
+                  (getenv "XDG_RUNTIME_DIR")
+                  (getenv "TMPDIR")
+                  (getenv "TMP")
+                  (getenv "TEMP")
+                  "/tmp"))))
+      (cl-loop for candidate in candidates
+               until (file-exists-p candidate)
+               finally return candidate))))
 
 (defun elcord--make-process ()
   "Make the asynchronous process that communicates with Discord IPC."
@@ -320,7 +328,7 @@ Unused on other platforms.")
                   "PowerShell"
                   "-NoProfile"
                   "-ExecutionPolicy" "Bypass"
-                  "-Command" elcord--stdpipe-path "." elcord--discord-ipc-pipe)
+                  "-Command" elcord--stdpipe-path "." (format elcord--discord-ipc-pipe-format 0))
         :connection-type 'pipe
         :sentinel 'elcord--connection-sentinel
         :filter 'elcord--connection-filter

@@ -6,7 +6,7 @@
 ;;      Wilfredo Velázquez-Rodríguez <zulu.inuoe@gmail.com>
 ;; Created: 21 Nov 2017
 ;; Edited:  08/07/2024
-;; Version: 1.1.3
+;; Version: 1.1.4
 ;; Keywords: Discord
 ;; Homepage: https://github.com/zdragonsk/elcord-ts
 ;; Package-Requires: ((emacs "25.1"))
@@ -138,7 +138,7 @@ Note, these icon names must be available as 'small_image' in Discord."
                                   (regexp :tag "Regex"))
                 :value-type (choice (string :tag "Icon name")
                                     (function :tag "Mapping function")))
-  :group 'elcord-ts-ts)
+  :group 'elcord-ts)
 
 (defcustom elcord-mode-text-alist '((agda-mode . "Agda")
                                     (assembly-mode . "Assembly")

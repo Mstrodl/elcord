@@ -6,7 +6,7 @@
 ;;      Wilfredo Velázquez-Rodríguez <zulu.inuoe@gmail.com>
 ;; Created: 21 Nov 2017
 ;; Edited:  08/07/2024
-;; Version: 1.1.1
+;; Version: 1.1.2
 ;; Keywords: Discord
 ;; Homepage: https://github.com/zdragonsk/elcord-ts
 ;; Package-Requires: ((emacs "25.1"))

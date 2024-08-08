@@ -116,6 +116,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (puml-mode . "puml-mode_icon")
                                     (puppet-mode . "puppet-mode_icon")
                                     (python-mode . "python-mode_icon")
+				    (python-ts-mode . "python-mode_icon")
                                     (racket-mode . "racket-mode_icon")
                                     (ruby-mode . "ruby-mode_icon")
                                     (rust-ts-mode . "rust-mode_icon")
@@ -128,6 +129,7 @@ See <https://discordapp.com/developers/applications/me>."
 				    (typescript-mode . "typescript-mode_icon")
 				    (tsx-ts-mode . "typescript-mode_icon")
                                     (zig-mode . "zig-mode_icon")
+				    ("*terminal*" . "comint-mode_icon")
                                     ("^slime-.*" . "lisp-mode_icon")
                                     ("^sly-.*$" . "lisp-mode_icon"))
   "Mapping alist of major modes to icon names to have elcord use.

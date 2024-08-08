@@ -2,12 +2,13 @@
 
 ;; Copyright (C) 2017 heatingdevice
 
-;; Author: heatingdevice
+;; Author: heatingdevice and edited by zDragonSK
 ;;      Wilfredo Velázquez-Rodríguez <zulu.inuoe@gmail.com>
 ;; Created: 21 Nov 2017
-;; Version: 1.1.0
-;; Keywords: games
-;; Homepage: https://github.com/Mstrodl/elcord
+;; Edited:  08/07/2024
+;; Version: 1.1.0 (edited)
+;; Keywords: Discord
+;; Homepage: https://github.com/zdragonsk/elcord-ts
 ;; Package-Requires: ((emacs "25.1"))
 ;; License: MIT
 
@@ -62,7 +63,7 @@ See <https://discordapp.com/developers/applications/me>."
   :type 'integer
   :group 'elcord)
 
-(defcustom elcord-idle-message "Getting something to drink..."
+(defcustom elcord-idle-message "[AFK] Deixei o Emacs e descobri uma vida..."
   "Message to show when elcord status is idle."
   :type 'string)
 
@@ -74,14 +75,14 @@ See <https://discordapp.com/developers/applications/me>."
 (defcustom elcord-mode-icon-alist '((agda-mode . "agda-mode_icon")
                                     (assembly-mode . "assembly-mode_icon")
                                     (bqn-mode . "bqn-mode_icon")
-                                    (c-mode . "c-mode_icon")
-                                    (c++-mode . "cpp-mode_icon")
+                                    (c-ts-mode . "c-mode_icon")
+                                    (c++-ts-mode . "cpp-mode_icon")
                                     (clojure-mode . "clojure-mode_icon")
                                     (csharp-mode . "csharp-mode_icon")
                                     (comint-mode . "comint-mode_icon")
                                     (cperl-mode . "cperl-mode_icon")
                                     (dockerfile-mode . "dockerfile-mode_icon")
-                                    (elixir-mode . "elixir-mode_icon")
+                                    (elixir-ts-mode . "elixir-mode_icon")
                                     (emacs-lisp-mode . (elcord--editor-icon))
                                     (enh-ruby-mode . "ruby-mode_icon")
                                     (erc-mode . "irc-mode_icon")
@@ -95,7 +96,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (hy-mode . "hy-mode_icon")
                                     (java-mode . "java-mode_icon")
                                     (julia-mode . "julia-mode_icon")
-                                    (js-mode . "javascript-mode_icon")
+                                    (js-ts-mode . "javascript-mode_icon")
                                     (kotlin-mode . "kotlin-mode_icon")
                                     (go-mode . "go-mode_icon")
                                     (latex-mode . "latex-mode_icon")
@@ -117,13 +118,13 @@ See <https://discordapp.com/developers/applications/me>."
                                     (python-mode . "python-mode_icon")
                                     (racket-mode . "racket-mode_icon")
                                     (ruby-mode . "ruby-mode_icon")
-                                    (rust-mode . "rust-mode_icon")
+                                    (rust-ts-mode . "rust-mode_icon")
                                     (rustic-mode . "rust-mode_icon")
                                     (scala-mode . "scala-mode_icon")
                                     (solidity-mode . "solidity-mode_icon")
                                     (sh-mode . "comint-mode_icon")
                                     (terraform-mode . "terraform-mode_icon")
-                                    (typescript-mode . "typescript-mode_icon")
+                                    (typescript-ts-mode . "typescript-mode_icon")
                                     (zig-mode . "zig-mode_icon")
                                     ("^slime-.*" . "lisp-mode_icon")
                                     ("^sly-.*$" . "lisp-mode_icon"))
@@ -138,7 +139,7 @@ Note, these icon names must be available as 'small_image' in Discord."
 (defcustom elcord-mode-text-alist '((agda-mode . "Agda")
                                     (assembly-mode . "Assembly")
                                     (bqn-mode . "BQN")
-                                    (c-mode . "C  ")
+                                    (c-ts-mode . "C  ")
                                     (c++-mode . "C++")
                                     (csharp-mode . "C#")
                                     (cperl-mode . "Perl")
@@ -509,7 +510,7 @@ otherwise if it is a function, call it with `mode' and return that value."
     ((progn elcord-editor-icon) elcord-editor-icon)
     ((boundp 'spacemacs-version) "spacemacs_icon")
     ((boundp 'doom-version) "doom_icon")
-    (t "emacs_icon"))))
+    (t "emacs_dragon_icon"))))
 
 (defun elcord--mode-icon ()
   "Figure out what icon to use for the current major mode.

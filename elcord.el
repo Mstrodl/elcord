@@ -6,7 +6,7 @@
 ;;      Wilfredo Velázquez-Rodríguez <zulu.inuoe@gmail.com>
 ;; Created: 21 Nov 2017
 ;; Edited:  08/07/2024
-;; Version: 1.1.2
+;; Version: 1.1.3
 ;; Keywords: Discord
 ;; Homepage: https://github.com/zdragonsk/elcord-ts
 ;; Package-Requires: ((emacs "25.1"))
@@ -61,7 +61,7 @@ See <https://discordapp.com/developers/applications/me>."
 (defcustom elcord-idle-timer 300
   "How long to wait before setting the status to idle."
   :type 'integer
-  :group 'elcord)
+  :group 'elcord-ts)
 
 (defcustom elcord-idle-message "[AFK] Deixei o Emacs e descobri uma vida..."
   "Message to show when elcord status is idle."
@@ -70,7 +70,7 @@ See <https://discordapp.com/developers/applications/me>."
 (defcustom elcord-quiet 'nil
   "Whether or not to supress elcord messages (connecting, disconnecting, etc.)"
   :type 'boolean
-  :group 'elcord)
+  :group 'elcord-ts)
 
 (defcustom elcord-mode-icon-alist '((agda-mode . "agda-mode_icon")
                                     (assembly-mode . "assembly-mode_icon")
@@ -138,7 +138,7 @@ Note, these icon names must be available as 'small_image' in Discord."
                                   (regexp :tag "Regex"))
                 :value-type (choice (string :tag "Icon name")
                                     (function :tag "Mapping function")))
-  :group 'elcord)
+  :group 'elcord-ts-ts)
 
 (defcustom elcord-mode-text-alist '((agda-mode . "Agda")
                                     (assembly-mode . "Assembly")
@@ -177,13 +177,13 @@ Note, these icon names must be available as 'small_image' in Discord."
                                   (regexp :tag "Regex"))
                 :value-type (choice (string :tag "Text label")
                                     (function :tag "Mapping function")))
-  :group 'elcord)
+  :group 'elcord-ts)
 
 (defcustom elcord-display-elapsed 't
   "When enabled, Discord status will display the elapsed time since Emacs \
 has been started."
   :type 'boolean
-  :group 'elcord)
+  :group 'elcord-ts)
 
 (defvar elcord--startup-time (string-to-number (format-time-string "%s" (current-time))))
 
@@ -198,29 +198,29 @@ Otherwise, it will display:
 
 The mode text is the same found by `elcord-mode-text-alist'"
   :type 'boolean
-  :group 'elcord)
+  :group 'elcord-ts)
 
 (defcustom elcord-display-line-numbers 't
   "When enabled, shows the total line numbers of current buffer.
 Including the position of the cursor in the buffer."
   :type 'boolean
-  :group 'elcord)
+  :group 'elcord-ts)
 
 (defcustom elcord-buffer-details-format-function 'elcord-buffer-details-format
   "Function to return the buffer details string shown on discord.
 Swap this with your own function if you want a custom buffer-details message."
   :type 'function
-  :group 'elcord)
+  :group 'elcord-ts)
 
 (defcustom elcord-use-major-mode-as-main-icon 'nil
   "When enabled, the major mode determines the main icon, rather than it being the editor."
   :type 'boolean
-  :group 'elcord)
+  :group 'elcord-ts)
 
 (defcustom elcord-show-small-icon 't
   "When enabled, show the small icon as well as the main icon."
   :type 'boolean
-  :group 'elcord)
+  :group 'elcord-ts)
 
 (defcustom elcord-editor-icon 'nil
   "Icon to use for the text editor. When nil, use the editor's native icon."
@@ -233,14 +233,14 @@ Swap this with your own function if you want a custom buffer-details message."
                  (const :tag "Spacemacs" "spacemacs_icon")
                  (const :tag "Doom" "doom_icon")
                  (const :tag "Doom Cute" "doom_cute_icon"))
-  :group 'elcord)
+  :group 'elcord-ts)
 
 (defcustom elcord-boring-buffers-regexp-list '("^ "
                                                "\\\\*Messages\\\\*")
   "A list of regexp's to match boring buffers.
 When visiting a boring buffer, it will not show in the elcord presence."
   :type '(repeat regexp)
-  :group 'elcord)
+  :group 'elcord-ts)
 
 ;;;###autoload
 (define-minor-mode elcord-mode
@@ -248,7 +248,7 @@ When visiting a boring buffer, it will not show in the elcord presence."
   nil nil nil
   :require 'elcord
   :global t
-  :group 'elcord
+  :group 'elcord-ts
   :after-hook
   (progn
     (cond

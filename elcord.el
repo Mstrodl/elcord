@@ -125,6 +125,8 @@ See <https://discordapp.com/developers/applications/me>."
                                     (sh-mode . "comint-mode_icon")
                                     (terraform-mode . "terraform-mode_icon")
                                     (typescript-ts-mode . "typescript-mode_icon")
+				    (typescript-mode . "typescript-mode_icon")
+				    (tsx-ts-mode . "typescript-mode_icon")
                                     (zig-mode . "zig-mode_icon")
                                     ("^slime-.*" . "lisp-mode_icon")
                                     ("^sly-.*$" . "lisp-mode_icon"))

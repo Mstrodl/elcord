@@ -6,7 +6,7 @@
 ;;      Wilfredo Velázquez-Rodríguez <zulu.inuoe@gmail.com>
 ;; Created: 21 Nov 2017
 ;; Edited:  08/07/2024
-;; Version: 1.1.4
+;; Version: 1.1.7
 ;; Keywords: Discord
 ;; Homepage: https://github.com/zdragonsk/elcord-ts
 ;; Package-Requires: ((emacs "25.1"))
@@ -74,6 +74,7 @@ See <https://discordapp.com/developers/applications/me>."
 
 (defcustom elcord-mode-icon-alist '((agda-mode . "agda-mode_icon")
                                     (assembly-mode . "assembly-mode_icon")
+				    (asm-mode . "assembly-mode_icon")
                                     (bqn-mode . "bqn-mode_icon")
                                     (c-ts-mode . "c-mode_icon")
                                     (c++-ts-mode . "cpp-mode_icon")
@@ -200,7 +201,7 @@ The mode text is the same found by `elcord-mode-text-alist'"
   :type 'boolean
   :group 'elcord-ts)
 
-(defcustom elcord-display-line-numbers 't
+(defcustom elcord-display-line-numbers 'nil
   "When enabled, shows the total line numbers of current buffer.
 Including the position of the cursor in the buffer."
   :type 'boolean

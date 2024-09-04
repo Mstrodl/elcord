@@ -63,7 +63,7 @@ See <https://discordapp.com/developers/applications/me>."
   :type 'integer
   :group 'elcord-ts)
 
-(defcustom elcord-idle-message "[AFK] Deixei o Emacs e descobri uma vida..."
+(defcustom elcord-idle-message "[AFK] Ausente do Emacs..."
   "Message to show when elcord status is idle."
   :type 'string)
 
@@ -723,7 +723,7 @@ If there is no 'previous' buffer attempt to find a non-boring buffer to initiali
     (elcord--start-updates)
 
     (unless elcord-quiet
-      (message "elcord: welcome back"))))
+      (message "elcord: Seja bem-vindo, freguês!"))))
 
 
 (provide 'elcord)

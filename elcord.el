@@ -492,7 +492,8 @@ Argument OBJ The data to send to the IPC server."
            `((:op . ,opcode)
              (:len . ,datalen)
              (:data . ,jsonstr)))))
-    (process-send-string elcord--sock packet)))
+    (when elcord--sock
+      (process-send-string elcord--sock packet))))
 
 (defun elcord--test-match-p (test mode)
   "Test `MODE' against `TEST'.

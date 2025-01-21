@@ -156,6 +156,7 @@ Note, these icon names must be available as 'small_image' in Discord."
                                     (markdown-mode . "Markdown")
                                     (magit-mode . "It's Magit!")
                                     ("mhtml-mode" . "HTML")
+                                    (nasm-mode . "NASM")
                                     (nim-mode . "Nim")
                                     (ocaml-mode . "OCaml")
                                     (pascal-mode . "Pascal")

@@ -340,6 +340,7 @@ Unused on other platforms.")
        (make-network-process
         :name "*elcord-sock*"
         :remote (elcord--find-discord-ipc-pipe)
+        :service nil
         :sentinel 'elcord--connection-sentinel
         :filter 'elcord--connection-filter
         :noquery t)))))

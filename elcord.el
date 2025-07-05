@@ -63,7 +63,7 @@ See <https://discordapp.com/developers/applications/me>."
   :type 'integer
   :group 'elcord-ts)
 
-(defcustom elcord-idle-message "[AFK] Ausente do Emacs..."
+(defcustom elcord-idle-message "Ausente do Emacs..."
   "Message to show when elcord status is idle."
   :type 'string)
 

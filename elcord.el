@@ -104,6 +104,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (lua-mode . "lua-mode_icon")
                                     (magit-mode . "magit-mode_icon")
                                     (markdown-mode . "markdown-mode_icon")
+                                    (mermaid-mode . "mermaid-mode_icon")
                                     (meson-mode . "meson-mode_icon")
                                     (nasm-mode . "nasm-mode_icon")
                                     (nim-mode . "nim-mode_icon")

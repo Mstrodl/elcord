@@ -243,7 +243,7 @@ When visiting a boring buffer, it will not show in the elcord presence."
   :type '(repeat regexp)
   :group 'elcord)
 
-(defcustom elcord-discord-ipc-path 'nil
+(defcustom elcord-discord-ipc-path "/run/user/1000/snap.discord/discord-ipc-0"
   "Path to the Discord IPC pipe. When nil, the default path is used."
   :type 'string
   :group 'elcord)

@@ -118,6 +118,7 @@ See <https://discordapp.com/developers/applications/me>."
                                     (puppet-mode . "puppet-mode_icon")
                                     (python-mode . "python-mode_icon")
                                     (racket-mode . "racket-mode_icon")
+                                    (raku-mode . "raku-mode_icon")
                                     (ruby-mode . "ruby-mode_icon")
                                     (rust-mode . "rust-mode_icon")
                                     (rustic-mode . "rust-mode_icon")

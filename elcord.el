@@ -185,7 +185,7 @@ has been started."
   :type 'boolean
   :group 'elcord)
 
-(defvar elcord--startup-time (string-to-number (format-time-string "%s" (current-time))))
+(defvar elcord--startup-time (string-to-number (format-time-string "%3N" (current-time))))
 
 (defcustom elcord-display-buffer-details 't
   "When enabled, Discord status will display buffer name and line numbers:
